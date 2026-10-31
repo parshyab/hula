@@ -1,0 +1,153 @@
+// Saathi HRMS — Phase 0 schema skeleton.
+// Only the shared core needed for the walking slice + the audit/KB spine.
+// Full module schemas (attendance, leave, payroll, claims, CLMS, …) arrive in Phase 1+.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector, pgcrypto]
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  SUSPENDED
+  SEPARATED
+  RETIRED
+}
+
+/// The employee master (Phase 0 subset). The full digital service book
+/// timeline is added in Phase 1. PII is stored masked + tokenized only.
+model Employee {
+  id            String         @id @default(cuid())
+  empCode       String         @unique
+  firstName     String
+  lastName      String
+  grade         String?
+  payScale      String?
+  unit          String?
+  dept          String?
+  designation   String?
+  status        EmployeeStatus @default(ACTIVE)
+  dateOfJoining DateTime?
+  dateOfBirth   DateTime?
+
+  // PII — never stored in plaintext. Masked value for display + opaque token
+  // that resolves to the real value only through the field-encryption service.
+  panMasked     String?
+  panToken      String?
+  aadhaarMasked String?
+  aadhaarToken  String?
+  bankMasked    String?
+  bankToken     String?
+
+  user      User?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([unit])
+}
+
+/// A login identity. Either a Keycloak subject (web console via OIDC) or a
+/// mobile number (OTP + PIN). Carries RBAC roles and ABAC attributes used by
+/// the single `can()` policy check shared by the UI and (later) agent tools.
+model User {
+  id          String  @id @default(cuid())
+  keycloakSub String? @unique
+  mobile      String? @unique
+  roles       String[] @default([])
+  unit        String?
+  dept        String?
+
+  empCode  String?   @unique
+  employee Employee? @relation(fields: [empCode], references: [empCode])
+
+  pin       PinCredential?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+/// Hashed PIN for the mobile/WhatsApp/SMS flow, with lockout counters.
+model PinCredential {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pinHash        String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  updatedAt      DateTime  @updatedAt
+}
+
+/// One-time passcode challenge for mobile login / sensitive confirmations.
+model OtpChallenge {
+  id         String    @id @default(cuid())
+  mobile     String
+  codeHash   String
+  purpose    String    @default("login")
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([mobile])
+}
+
+/// Append-only, hash-chained audit log. Every human and agent action lands here
+/// through the single `audit.record()` writer. `seq` gives deterministic order
+/// for the chain; `hash = sha256(prevHash + canonical(payload))`.
+model AuditEvent {
+  id           String   @id @default(cuid())
+  seq          BigInt   @unique @default(autoincrement())
+  actorType    String // 'human' | 'agent'
+  actorId      String
+  action       String
+  resourceType String?
+  resourceId   String?
+  inputs       Json?
+  outputs      Json?
+  ruleVersion  String?
+  citedClause  String?
+  modelUsed    String?
+  prevHash     String
+  hash         String   @unique
+  createdAt    DateTime @default(now())
+
+  @@index([actorId])
+  @@index([resourceType, resourceId])
+}
+
+/// A policy document in the knowledge base (one language per row).
+model PolicyDoc {
+  id            String        @id @default(cuid())
+  key           String // 'leave' | 'ltc' | 'medical' | 'tada' | 'conduct'
+  title         String
+  lang          String        @default("en")
+  version       String        @default("v1")
+  effectiveFrom DateTime      @default(now())
+  chunks        PolicyChunk[]
+  createdAt     DateTime      @default(now())
+
+  @@unique([key, lang, version])
+}
+
+/// A retrievable chunk of a policy doc. `clauseRef` is what an agent MUST cite.
+/// `embedding` is a pgvector column; Phase 0 retrieval is keyword-based and
+/// populates embeddings properly in Phase 1.
+model PolicyChunk {
+  id        String                       @id @default(cuid())
+  docId     String
+  doc       PolicyDoc                    @relation(fields: [docId], references: [id], onDelete: Cascade)
+  clauseRef String
+  heading   String
+  content   String
+  lang      String                       @default("en")
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+
+  @@index([lang])
+}

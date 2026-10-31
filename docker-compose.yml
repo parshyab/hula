@@ -1,0 +1,40 @@
+# Local development infrastructure for Saathi HRMS.
+# Everything runs on-prem; no cloud services. Bring up with `pnpm infra:up`.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: saathi-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-saathi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-saathi_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-saathi}
+    ports:
+      # Host 5433 → container 5432 (5432 is often taken by another local Postgres).
+      - '5433:5432'
+    volumes:
+      - saathi-pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-saathi} -d ${POSTGRES_DB:-saathi}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: saathi-keycloak
+    command: ['start-dev', '--import-realm']
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HEALTH_ENABLED: 'true'
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  saathi-pgdata:

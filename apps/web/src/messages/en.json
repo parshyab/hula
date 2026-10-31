@@ -1,0 +1,56 @@
+{
+  "common": {
+    "appName": "Saathi",
+    "tagline": "Your HR companion",
+    "loading": "Loading…",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "nav": { "profile": "My profile", "activity": "Activity", "askSaathi": "Ask HR Saathi" },
+  "login": {
+    "title": "Sign in to Saathi",
+    "subtitle": "Use your mobile number, OTP and PIN.",
+    "mobile": "Mobile number",
+    "requestOtp": "Send OTP",
+    "otp": "OTP",
+    "pin": "PIN",
+    "signIn": "Sign in",
+    "otpSentDev": "Demo OTP (dev only): {code}",
+    "consoleHint": "HR staff can also sign in with the web console (Keycloak).",
+    "consoleLogin": "Console sign-in",
+    "error": "Could not sign in. Check your OTP and PIN."
+  },
+  "profile": {
+    "title": "My profile",
+    "empCode": "Employee code",
+    "grade": "Grade",
+    "unit": "Unit",
+    "designation": "Designation",
+    "status": "Status",
+    "pan": "PAN (masked)",
+    "bank": "Bank (masked)"
+  },
+  "saathi": {
+    "title": "Ask HR Saathi",
+    "placeholder": "e.g. How much leave do I have left?",
+    "ask": "Ask",
+    "thinking": "Saathi is thinking…",
+    "source": "Source",
+    "why": "Why?",
+    "whyTitle": "Why Saathi answered this",
+    "modelUsed": "Model",
+    "toolsUsed": "Tools used",
+    "noCitation": "No policy clause was cited for this answer."
+  },
+  "activity": {
+    "title": "Activity feed",
+    "subtitle": "Every human and agent action, hash-chained.",
+    "empty": "No activity yet. Ask Saathi something to see it here.",
+    "actor": "Actor",
+    "action": "Action",
+    "when": "When",
+    "agent": "Agent",
+    "human": "Human",
+    "hrOnly": "The activity feed is visible to HR officers only."
+  }
+}

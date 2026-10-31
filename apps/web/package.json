@@ -1,0 +1,33 @@
+{
+  "name": "@saathi/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@saathi/config": "workspace:*",
+    "@saathi/ui": "workspace:*",
+    "@tanstack/react-query": "5.56.2",
+    "@trpc/client": "11.0.0-rc.553",
+    "@trpc/react-query": "11.0.0-rc.553",
+    "next": "14.2.14",
+    "next-intl": "3.26.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@saathi/api": "workspace:*",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.47",
+    "tailwindcss": "3.4.13",
+    "typescript": "5.6.3"
+  }
+}

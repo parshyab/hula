@@ -1,0 +1,26 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+.next/
+out/
+storybook-static/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# prisma
+packages/db/prisma/*.db
+
+# logs & os
+*.log
+.DS_Store
+coverage/
+test-results/
+playwright-report/
+.turbo/

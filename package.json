@@ -1,0 +1,35 @@
+{
+  "name": "saathi-hrms",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Saathi HRMS — agent-first HRMS for Numaligarh Refinery Limited (NRL)",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "storybook": "pnpm --filter @saathi/ui storybook",
+    "db:generate": "pnpm --filter @saathi/db generate",
+    "db:migrate": "pnpm --filter @saathi/db migrate",
+    "db:seed": "pnpm --filter @saathi/db seed",
+    "db:push": "pnpm --filter @saathi/db push",
+    "audit:verify": "pnpm --filter @saathi/api audit:verify",
+    "evals": "pnpm --filter @saathi/evals test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.5",
+    "eslint": "9.12.0",
+    "prettier": "3.3.3",
+    "turbo": "2.1.3",
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.8.1"
+  }
+}

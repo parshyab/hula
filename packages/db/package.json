@@ -1,0 +1,32 @@
+{
+  "name": "@saathi/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "echo 'no build (consumed as source)'",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "push": "prisma db push",
+    "seed": "tsx prisma/seed.ts",
+    "studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "5.20.0",
+    "@saathi/auth": "workspace:*",
+    "@saathi/config": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "5.20.0",
+    "tsx": "4.19.1",
+    "typescript": "5.6.3"
+  }
+}

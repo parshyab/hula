@@ -1,0 +1,52 @@
+/* Semantic CSS variables with light + dark themes.
+   Dark mode follows the OS by default and can be forced with [data-theme]. */
+:root {
+  --color-bg: #f7faf9;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef4f2;
+  --color-border: #d9e4e1;
+  --color-text: #0c2b25;
+  --color-text-muted: #51665f;
+  --color-primary: #0d7c66;
+  --color-primary-fg: #ffffff;
+  --color-primary-hover: #0c6353;
+  --color-accent: #cf9a3b;
+  --color-danger: #b4232a;
+  --color-success: #0d7c66;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --motion-base: 200ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #061a16;
+    --color-surface: #0c2b25;
+    --color-surface-2: #0d3b32;
+    --color-border: #175044;
+    --color-text: #e6f2ee;
+    --color-text-muted: #9cb8b0;
+    --color-primary: #39b596;
+    --color-primary-fg: #042520;
+    --color-primary-hover: #6fd1b6;
+    --color-accent: #e0b15a;
+    --color-danger: #f0888c;
+    --color-success: #39b596;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #061a16;
+  --color-surface: #0c2b25;
+  --color-surface-2: #0d3b32;
+  --color-border: #175044;
+  --color-text: #e6f2ee;
+  --color-text-muted: #9cb8b0;
+  --color-primary: #39b596;
+  --color-primary-fg: #042520;
+  --color-primary-hover: #6fd1b6;
+  --color-accent: #e0b15a;
+  --color-danger: #f0888c;
+  --color-success: #39b596;
+}

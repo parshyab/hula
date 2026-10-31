@@ -1,0 +1,37 @@
+{
+  "name": "@saathi/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./trpc": "./src/trpc/router.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "echo 'no build (run via tsx)'",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "audit:verify": "tsx src/scripts/verify-audit.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "10.0.1",
+    "@saathi/agents": "workspace:*",
+    "@saathi/auth": "workspace:*",
+    "@saathi/config": "workspace:*",
+    "@saathi/db": "workspace:*",
+    "@saathi/llm": "workspace:*",
+    "@saathi/rules": "workspace:*",
+    "@trpc/server": "11.0.0-rc.553",
+    "dotenv": "16.4.5",
+    "fastify": "5.0.0",
+    "jose": "5.9.3",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "4.19.1",
+    "typescript": "5.6.3",
+    "vitest": "2.1.2"
+  }
+}
