@@ -30,6 +30,11 @@ const TOOLS: ToolDef[] = [
     description: 'policy rules leave medical ltc conduct clause citation entitlement',
     parameters: { type: 'object', properties: {} },
   },
+  {
+    name: 'draftLeave',
+    description: 'apply submit start draft create new leave request casual earned holiday',
+    parameters: { type: 'object', properties: {} },
+  },
 ];
 
 const POLICY_MISS: Record<Locale, string> = {
@@ -37,6 +42,18 @@ const POLICY_MISS: Record<Locale, string> = {
   hi: 'यह मुझे नीति ज्ञान-कोष में नहीं मिला, इसलिए मैं अनुमान नहीं लगाऊँगा। क्या मैं आपके लिए HR से प्रश्न उठाऊँ?',
   as: 'এইটো মই নীতি জ্ঞান-ভঁৰালত বিচাৰি নাপালোঁ, গতিকে অনুমান নকৰোঁ। মই আপোনাৰ বাবে HR ৰ ওচৰত প্ৰশ্ন উত্থাপন কৰিম নে?',
 };
+
+function draftLeaveText(locale: Locale, clause: string | null): string {
+  const src = clause ? ` (${clause})` : '';
+  switch (locale) {
+    case 'hi':
+      return `मैंने आपके लिए एक छुट्टी अनुरोध का मसौदा तैयार कर दिया है${src}। कृपया "छुट्टी" स्क्रीन पर तिथियाँ पुष्टि करके जमा करें — स्वीकृति HR देगा।`;
+    case 'as':
+      return `মই আপোনাৰ বাবে এটা ছুটীৰ অনুৰোধৰ খচৰা প্ৰস্তুত কৰিছোঁ${src}। অনুগ্ৰহ কৰি "ছুটী" স্ক্ৰীনত তাৰিখ নিশ্চিত কৰি দাখিল কৰক — অনুমোদন HR এ দিব।`;
+    default:
+      return `I've prepared a leave request draft for you${src}. Confirm the dates on the Leave screen to submit — HR will approve it.`;
+  }
+}
 
 function leaveText(locale: Locale, el: number, cl: number, clause: string): string {
   switch (locale) {
@@ -138,6 +155,12 @@ async function executeTool(name: string, deps: SaathiDeps): Promise<ToolOutcome>
       const hit: PolicyHit | null = await deps.searchPolicy(deps.question, locale);
       if (!hit) return { content: POLICY_MISS[locale], citedClause: null };
       return { content: `${hit.content} (clause ${hit.clauseRef})`, citedClause: hit.clauseRef };
+    }
+    case 'draftLeave': {
+      // The agent only DRAFTS. The worker confirms + submits on the Leave screen;
+      // HR approves. No agent tool submits or approves a request.
+      const lv = subject.empCode ? await deps.getLeaveBalance(subject.empCode) : null;
+      return { content: draftLeaveText(locale, lv?.clauseRef ?? null), citedClause: lv?.clauseRef ?? null };
     }
     default:
       return { content: POLICY_MISS[locale], citedClause: null };

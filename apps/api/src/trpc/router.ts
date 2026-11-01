@@ -9,6 +9,7 @@ import { router, protectedProcedure } from './trpc';
 import { getEmployee, getLeaveBalance } from '../repo';
 import { record } from '../audit';
 import { env } from '../env';
+import { employeesRouter, leaveRouter, documentsRouter } from './hr-console';
 
 const gateway = getGateway({
   provider: env.LLM_PROVIDER,
@@ -44,30 +45,14 @@ export const appRouter = router({
     }),
   }),
 
-  /** Read another employee — demonstrates RBAC/ABAC denial. */
-  employees: router({
-    get: protectedProcedure.input(z.object({ empCode: z.string() })).query(async ({ ctx, input }) => {
-      const emp = await getEmployee(input.empCode);
-      const decision = can(ctx.subject, 'employee.read', {
-        type: 'employee',
-        ownerEmpCode: input.empCode,
-        unit: emp?.unit,
-      });
-      await record({
-        actorType: 'human',
-        actorId: ctx.subject.userId,
-        action: 'employee.read',
-        resourceType: 'employee',
-        resourceId: input.empCode,
-        outputs: { allowed: decision.allowed, reason: decision.reason },
-      });
-      if (!decision.allowed) {
-        throw new TRPCError({ code: 'FORBIDDEN', message: decision.reason });
-      }
-      if (!emp) throw new TRPCError({ code: 'NOT_FOUND', message: 'Employee not found' });
-      return emp;
-    }),
-  }),
+  /** HR directory: search, open a record, read the service book. */
+  employees: employeesRouter,
+
+  /** Leave: worker submits; HR/manager decides with the cited rule. */
+  leave: leaveRouter,
+
+  /** Document generation + public QR verification. */
+  documents: documentsRouter,
 
   /** The agent + human activity feed (Why?/Undo is layered on top in Phase 1). */
   audit: router({

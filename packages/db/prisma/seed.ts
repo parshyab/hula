@@ -5,7 +5,7 @@
  *
  * The full 1,100-employee / 3-year-history / CLMS seed arrives in Phase 1.
  */
-import { PrismaClient, EmployeeStatus } from '@prisma/client';
+import { PrismaClient, EmployeeStatus, ServiceEntryType, LeaveType, LeaveStatus } from '@prisma/client';
 import { hashPin } from '@saathi/auth';
 
 const prisma = new PrismaClient();
@@ -28,6 +28,9 @@ const LAST_NAMES = [
 
 async function main() {
   console.log('→ clearing existing rows…');
+  await prisma.generatedDocument.deleteMany();
+  await prisma.leaveRequest.deleteMany();
+  await prisma.serviceBookEntry.deleteMany();
   await prisma.policyChunk.deleteMany();
   await prisma.policyDoc.deleteMany();
   await prisma.pinCredential.deleteMany();
@@ -35,9 +38,10 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.employee.deleteMany();
 
-  console.log('→ seeding employees…');
+  console.log('→ seeding employees + service book…');
   for (let i = 0; i < 20; i++) {
     const empCode = `E-${(10001 + i).toString()}`;
+    const joined = new Date(2010 + (i % 12), i % 12, 1 + (i % 27));
     await prisma.employee.create({
       data: {
         empCode,
@@ -49,13 +53,42 @@ async function main() {
         dept: i % 3 === 0 ? 'HR' : i % 3 === 1 ? 'Operations' : 'Finance',
         designation: i % 5 === 0 ? 'Manager' : 'Officer',
         status: EmployeeStatus.ACTIVE,
-        dateOfJoining: new Date(2010 + (i % 12), i % 12, 1 + (i % 27)),
+        dateOfJoining: joined,
         // PII stored masked + token only — never plaintext.
         panMasked: `XXXXX${(1000 + i).toString()}X`,
         panToken: `tok_pan_${empCode}`,
         bankMasked: `XXXXXX${(4000 + i).toString()}`,
         bankToken: `tok_bank_${empCode}`,
       },
+    });
+
+    // A small, realistic career timeline per employee (append-only).
+    const y = joined.getFullYear();
+    await prisma.serviceBookEntry.createMany({
+      data: [
+        {
+          empCode,
+          entryType: ServiceEntryType.JOINING,
+          effectiveDate: joined,
+          title: `Joined NRL as ${GRADES[i % GRADES.length]}`,
+          detail: `Posted to ${UNITS[i % UNITS.length]}`,
+          orderRef: `NRL/HR/APPT/${y}/${1000 + i}`,
+        },
+        {
+          empCode,
+          entryType: ServiceEntryType.TRAINING,
+          effectiveDate: new Date(y + 1, 5, 15),
+          title: 'Mandatory safety induction',
+          detail: 'Process Safety Management — Level 1',
+        },
+        {
+          empCode,
+          entryType: ServiceEntryType.PROMOTION,
+          effectiveDate: new Date(y + 5, 3, 1),
+          title: `Promoted to ${GRADES[(i + 1) % GRADES.length]}`,
+          orderRef: `NRL/HR/PROM/${y + 5}/${200 + i}`,
+        },
+      ],
     });
   }
 
@@ -109,8 +142,21 @@ async function main() {
     ],
   );
 
+  console.log('→ seeding a pending leave request for the HR inbox…');
+  await prisma.leaveRequest.create({
+    data: {
+      empCode: 'E-10002',
+      leaveType: LeaveType.CL,
+      fromDate: new Date('2026-11-10'),
+      toDate: new Date('2026-11-11'),
+      days: 2,
+      reason: 'Family function',
+      status: LeaveStatus.SUBMITTED,
+    },
+  });
+
   const count = await prisma.employee.count();
-  console.log(`✓ seed complete — ${count} employees, 2 login users, policy corpus loaded.`);
+  console.log(`✓ seed complete — ${count} employees, service book, 1 pending leave, policy corpus.`);
 }
 
 type Lang = 'en' | 'hi' | 'as';

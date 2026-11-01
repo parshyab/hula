@@ -17,9 +17,54 @@ export interface EmployeeDTO {
   bankMasked: string | null;
 }
 
-export async function getEmployee(empCode: string): Promise<EmployeeDTO | null> {
-  const e = await prisma.employee.findUnique({ where: { empCode } });
-  if (!e) return null;
+/** Directory search for HR — by name, employee code, unit or dept. */
+export async function listEmployees(query: string, limit = 25): Promise<EmployeeDTO[]> {
+  const q = query.trim();
+  const where = q
+    ? {
+        OR: [
+          { empCode: { contains: q, mode: 'insensitive' as const } },
+          { firstName: { contains: q, mode: 'insensitive' as const } },
+          { lastName: { contains: q, mode: 'insensitive' as const } },
+          { unit: { contains: q, mode: 'insensitive' as const } },
+          { dept: { contains: q, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+  const rows = await prisma.employee.findMany({ where, take: limit, orderBy: { empCode: 'asc' } });
+  return rows.map(toDTO);
+}
+
+/** The immutable service-book timeline, newest first. */
+export async function getServiceBook(empCode: string) {
+  const rows = await prisma.serviceBookEntry.findMany({
+    where: { empCode },
+    orderBy: { effectiveDate: 'desc' },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    entryType: r.entryType,
+    effectiveDate: r.effectiveDate.toISOString(),
+    title: r.title,
+    detail: r.detail,
+    orderRef: r.orderRef,
+  }));
+}
+
+function toDTO(e: {
+  empCode: string;
+  firstName: string;
+  lastName: string;
+  grade: string | null;
+  payScale: string | null;
+  unit: string | null;
+  dept: string | null;
+  designation: string | null;
+  status: string;
+  dateOfJoining: Date | null;
+  panMasked: string | null;
+  bankMasked: string | null;
+}): EmployeeDTO {
   return {
     empCode: e.empCode,
     firstName: e.firstName,
@@ -34,6 +79,11 @@ export async function getEmployee(empCode: string): Promise<EmployeeDTO | null> 
     panMasked: e.panMasked,
     bankMasked: e.bankMasked,
   };
+}
+
+export async function getEmployee(empCode: string): Promise<EmployeeDTO | null> {
+  const e = await prisma.employee.findUnique({ where: { empCode } });
+  return e ? toDTO(e) : null;
 }
 
 /** Leave balance derived from the rules engine (never hardcoded). */

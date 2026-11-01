@@ -52,5 +52,51 @@
     "agent": "Agent",
     "human": "Human",
     "hrOnly": "The activity feed is visible to HR officers only."
+  },
+  "leave": {
+    "title": "Leave",
+    "myRequests": "My leave requests",
+    "request": "Request leave",
+    "type": "Type",
+    "from": "From",
+    "to": "To",
+    "days": "Days",
+    "reason": "Reason (optional)",
+    "submit": "Submit request",
+    "none": "No leave requests yet.",
+    "submitted": "Submitted"
+  },
+  "console": {
+    "title": "HR Console",
+    "directory": "Directory",
+    "approvals": "Approvals",
+    "search": "Search by name, code or unit",
+    "open": "Open",
+    "backToDirectory": "Back to directory",
+    "serviceBook": "Service book",
+    "generate": "Generate document",
+    "salaryCert": "Salary certificate",
+    "serviceCert": "Service certificate",
+    "noc": "NOC",
+    "approve": "Approve",
+    "reject": "Reject",
+    "inboxEmpty": "No pending requests — all caught up.",
+    "forbidden": "The HR console is for HR officers and managers.",
+    "rule": "Rule"
+  },
+  "documents": {
+    "title": "My documents",
+    "request": "Request salary certificate",
+    "download": "Download PDF",
+    "verifyCode": "Verification code",
+    "none": "No documents yet."
+  },
+  "verify": {
+    "title": "Document verification",
+    "valid": "Authentic document",
+    "invalid": "No document found for this code.",
+    "issuedTo": "Issued to",
+    "issuedOn": "Issued on",
+    "expires": "Expires"
   }
 }

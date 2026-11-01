@@ -21,6 +21,39 @@ enum EmployeeStatus {
   RETIRED
 }
 
+enum ServiceEntryType {
+  JOINING
+  PROMOTION
+  TRANSFER
+  INCREMENT
+  TRAINING
+  AWARD
+  ORDER
+}
+
+enum LeaveType {
+  EL
+  CL
+  HPL
+  MATERNITY
+  PATERNITY
+  SPECIAL
+}
+
+enum LeaveStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum DocType {
+  SALARY_CERTIFICATE
+  SERVICE_CERTIFICATE
+  NOC
+}
+
 /// The employee master (Phase 0 subset). The full digital service book
 /// timeline is added in Phase 1. PII is stored masked + tokenized only.
 model Employee {
@@ -46,9 +79,12 @@ model Employee {
   bankMasked    String?
   bankToken     String?
 
-  user      User?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user         User?
+  serviceBook  ServiceBookEntry[]
+  leaveRequests LeaveRequest[]
+  documents    GeneratedDocument[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
   @@index([unit])
 }
@@ -150,4 +186,70 @@ model PolicyChunk {
   createdAt DateTime                     @default(now())
 
   @@index([lang])
+}
+
+/// An entry in the digital service book — the immutable, version-stamped
+/// timeline of a career. Written through an append-only service; never updated
+/// or deleted. Every entry can carry the order that authorised it.
+model ServiceBookEntry {
+  id            String           @id @default(cuid())
+  empCode       String
+  employee      Employee         @relation(fields: [empCode], references: [empCode], onDelete: Cascade)
+  entryType     ServiceEntryType
+  effectiveDate DateTime
+  title         String
+  detail        String?
+  orderRef      String?
+  createdAt     DateTime         @default(now())
+
+  @@index([empCode, effectiveDate])
+}
+
+/// A leave request. The worker (or HR Saathi on their behalf) drafts and
+/// submits it; an HR officer / manager decides. The decision records the rule
+/// version and the policy clause it was judged against, for audit.
+model LeaveRequest {
+  id           String      @id @default(cuid())
+  empCode      String
+  employee     Employee    @relation(fields: [empCode], references: [empCode], onDelete: Cascade)
+  leaveType    LeaveType
+  fromDate     DateTime
+  toDate       DateTime
+  days         Int
+  reason       String?
+  status       LeaveStatus @default(DRAFT)
+
+  // Decision metadata (set when a human approves/rejects).
+  decidedByUserId String?
+  decidedAt       DateTime?
+  decisionNote    String?
+  ruleVersion     String?
+  citedClause     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([empCode])
+}
+
+/// A generated, QR-verifiable document (salary/service certificate, NOC).
+/// The PDF bytes live on disk; this row is the verifiable record. `verifyCode`
+/// is encoded in the QR and resolved by the public /verify endpoint.
+model GeneratedDocument {
+  id             String   @id @default(cuid())
+  empCode        String
+  employee       Employee @relation(fields: [empCode], references: [empCode], onDelete: Cascade)
+  docType        DocType
+  verifyCode     String   @unique
+  title          String
+  issuedByUserId String?
+  /// Short snapshot of what the document certifies, shown on the verify page.
+  summary        String
+  filePath       String?
+  passwordHint   String?
+  issuedAt       DateTime @default(now())
+  expiresAt      DateTime?
+
+  @@index([empCode])
 }

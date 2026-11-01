@@ -7,6 +7,8 @@ import { trpc } from '@/lib/trpc';
 import { getToken } from '@/lib/session';
 import { Link, useRouter } from '@/i18n/routing';
 import { AskSaathi } from '@/components/ask-saathi';
+import { LeaveCard } from '@/components/leave-card';
+import { DocumentsCard } from '@/components/documents-card';
 
 export default function MePage() {
   const t = useTranslations('profile');
@@ -51,9 +53,18 @@ export default function MePage() {
 
       <AskSaathi />
 
-      <Link href="/activity" className="text-sm font-medium text-brand hover:underline">
-        {tn('activity')} →
-      </Link>
+      <LeaveCard />
+
+      {data ? <DocumentsCard empCode={data.empCode} /> : null}
+
+      <div className="flex gap-4">
+        <Link href="/activity" className="text-sm font-medium text-brand hover:underline">
+          {tn('activity')} →
+        </Link>
+        <Link href="/console/directory" className="text-sm font-medium text-brand hover:underline">
+          HR Console →
+        </Link>
+      </div>
     </div>
   );
 }

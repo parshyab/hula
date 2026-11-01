@@ -21,6 +21,7 @@
     "@saathi/auth": "workspace:*",
     "@saathi/config": "workspace:*",
     "@saathi/db": "workspace:*",
+    "@saathi/docs-engine": "workspace:*",
     "@saathi/llm": "workspace:*",
     "@saathi/rules": "workspace:*",
     "@trpc/server": "11.0.0-rc.553",
