@@ -1,0 +1,16 @@
+# Netlify config for the NRL HR Saathi pitch demo.
+# Static single-page site — the whole demo is index.html.
+[build]
+  publish = "."
+
+# Serve index.html for any route (safe for a single-page demo).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
