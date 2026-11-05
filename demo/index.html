@@ -238,6 +238,28 @@
   .lcard .q { margin-top: 10px; font-size: 15px; color: var(--ink); }
   .lcard .a { margin-top: 8px; font-size: 13px; color: var(--muted); border-left: 3px solid var(--brand); padding-left: 10px; }
 
+  /* ---- distinguishing features ---- */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .fcard { position: relative; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); padding: 20px; display: flex; flex-direction: column; gap: 9px; box-shadow: var(--shadow); transition: transform .2s, border-color .2s; overflow: hidden; }
+  .fcard::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); opacity: .0; transition: opacity .2s; }
+  .fcard:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--brand) 40%, var(--border)); }
+  .fcard:hover::before { opacity: 1; }
+  .ficon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--brand) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border)); }
+  .fcard h4 { font-family: var(--font-display); font-size: 16.5px; font-weight: 700; margin: 2px 0 0; }
+  .fcard p { font-size: 13.5px; color: var(--muted); }
+  .fcard .tag { margin-top: auto; font-size: 11.5px; font-weight: 700; color: var(--brand); letter-spacing: .02em; }
+  .fcard.span2 { grid-column: span 2; }
+
+  /* ---- closing band ---- */
+  .cta-band { margin: 54px 0 0; border-radius: 22px; padding: 40px; background: linear-gradient(130deg, var(--brand) 0%, #0a5a4a 70%, #063f34 100%); color: #eafaf4; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .cta-band h3 { font-size: clamp(22px, 3vw, 30px); color: #fff; max-width: 20ch; }
+  .cta-band p { color: #c9ece0; margin-top: 8px; max-width: 42ch; font-size: 15px; }
+  .cta-band .btn.primary { background: #fff; color: #0a5a4a; }
+  .cta-band .btn.primary:hover { background: #eafaf4; }
+  .band-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+  .band-stats .b { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: #fff; }
+  .band-stats .l { font-size: 12.5px; color: #bfe6d9; max-width: 15ch; }
+
   footer { border-top: 1px solid var(--border); padding: 30px 0 50px; color: var(--muted); font-size: 13px; }
   .disc { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; }
   .disc b { color: var(--ink); }
@@ -248,7 +270,13 @@
     .arch { grid-template-columns: 1fr; }
     .arch .arrow { transform: rotate(90deg); justify-self: center; }
     .lang-grid { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; }
+    .fcard.span2 { grid-column: span 1; }
+    .cta-band { flex-direction: column; align-items: flex-start; padding: 28px; }
     .brand small { display: none; }
+  }
+  @media (max-width: 920px) and (min-width: 561px) {
+    .features { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 560px) {
     .seg.chan { display: none; }
@@ -333,6 +361,16 @@
     </div>
   </section>
 
+  <!-- DISTINGUISHING FEATURES -->
+  <section class="block" id="featuresSection">
+    <div class="wrap">
+      <span class="kicker" data-t="k5">Why HR will back it</span>
+      <h2 class="h2" data-t="h5">What makes Saathi different</h2>
+      <p class="sub" data-t="sub5">Not another portal. Six things an ESS screen can't do — the reasons HR, IT and vigilance all say yes.</p>
+      <div class="features" id="features"></div>
+    </div>
+  </section>
+
   <!-- RACE -->
   <section class="block" id="raceSection">
     <div class="wrap">
@@ -394,6 +432,24 @@
     </div>
   </section>
 
+  <!-- CLOSING BAND -->
+  <section class="block" style="border-top:0; padding-bottom:10px">
+    <div class="wrap">
+      <div class="cta-band">
+        <div>
+          <h3 data-t="bandH">Give 2,900 employees an HR desk in their pocket.</h3>
+          <p data-t="bandP">Same SAP, same records, same controls — a front door anyone can use in their own language.</p>
+          <div class="cta-row"><button class="btn primary" id="bandBtn" data-t="bandBtn">Replay the demo</button></div>
+        </div>
+        <div class="band-stats">
+          <div><div class="b num">~95%</div><div class="l" data-t="bandS1">fewer HR-desk lookups</div></div>
+          <div><div class="b num">0</div><div class="l" data-t="bandS2">hours of SAP training for staff</div></div>
+          <div><div class="b num">3</div><div class="l" data-t="bandS3">languages, incl. voice</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <div class="wrap">
       <div class="disc">
@@ -411,7 +467,8 @@ const SHARED = {
   leave:   { ref: "2000012345", dates: "Mon 10 – Tue 11 Nov", days: "2", bal: "10", infotype: "IT-2001" },
   payslip: { month: "October 2026", gross: "₹1,24,560", ded: "₹38,210", net: "₹86,350" },
   claim:   { id: "MED-2026-04417", amount: "₹7,480", credit: "08 Nov 2026" },
-  voice:   { el: "182", cl: "10" }
+  voice:   { el: "182", cl: "10" },
+  doc:     { emp: "Arnab Saikia · E-10002", code: "NRL-7F3A21" }
 };
 
 const I18N = {
@@ -442,7 +499,25 @@ const I18N = {
     discB:" All names, numbers, payslips, claims and SAP references shown are illustrative dummy data, not real employee records. NRL is referenced as the intended deployment context; this is a concept demo, not a live system.",
     foot:"NRL HR Saathi — conversational front door to SAP HCM · concept demo",
     greet:"Hello Arnab 👋 I'm HR Saathi. Ask me about your leave, payslip or claims — type, tap a shortcut below, or hold the mic to speak.",
-    quick:["Apply 2 days CL from Monday","Show my last payslip","Status of my medical claim"],
+    quick:["Apply 2 days CL from Monday","Show my last payslip","Status of my medical claim","Salary certificate now"],
+    nudgeChip:"🔔 Proactive nudge",
+    docReply:"Generating your salary certificate from SAP — password-protected, with a QR anyone can verify.",
+    docCard:{ title:"Salary certificate", type:"Type", typeV:"Salary Certificate", issuedTo:"Issued to", verify:"Verification code", valid:"Verifiable by QR", download:"Download PDF" },
+    nudgeMsg:"Heads-up — your fire-safety certification expires in 12 days. Want me to book the refresher and keep your gate pass valid?",
+    nudgeWarnTitle:"Safety certification expiring", nudgeExpires:"Expires in", nudgeExpiresV:"12 days", nudgeBook:"Book refresher", nudgeReschedule:"Remind me later", nudgeBooked:"Booked ✓ Refresher on 14 Nov, 10:00 — I've told your supervisor and SAP is updated.",
+    k5:"Why HR will back it", h5:"What makes Saathi different",
+    sub5:"Not another portal. Six things an ESS screen can't do — the reasons HR, IT and vigilance all say yes.",
+    features:[
+      {icon:"📄",title:"Documents in 10 seconds",body:"Payslip, Form 16, salary & service certificates, NOC — password-protected and QR-verifiable, on WhatsApp. No HR-desk visit.",tag:"Self-service"},
+      {icon:"🎓",title:"Zero SAP training",body:"Employees never see SAP. The agent runs the transaction for them, so there's nothing to learn and far fewer help-desk tickets.",tag:"Adoption"},
+      {icon:"🎙️",title:"Voice-first for the shop floor",body:"A shift operator with no laptop asks in spoken Assamese and hears the answer back. No app, no typing, no portal.",tag:"Inclusion"},
+      {icon:"📌",title:"Answers cite the rule",body:"Every policy reply quotes the exact clause. If there's no source, Saathi says so and raises a query — never a wrong number.",tag:"Trust"},
+      {icon:"🛡️",title:"Vigilance-grade audit",body:"Every read and write is logged and hash-chained, with a Why? drawer and Undo. Built for audit and vigilance from day one.",tag:"Governance"},
+      {icon:"🔔",title:"Saathi reaches out first",body:"Expiring safety training, lapsing leave, a retirement 12 months away — the agent nudges the employee before it becomes a problem.",tag:"Proactive"}
+    ],
+    bandH:"Give 2,900 employees an HR desk in their pocket.",
+    bandP:"Same SAP, same records, same controls — a front door anyone can use in their own language.",
+    bandBtn:"Replay the demo", bandS1:"fewer HR-desk lookups", bandS2:"hours of SAP training for staff", bandS3:"languages, incl. voice",
     cardLbl:{ leaveTitle:"Leave applied", type:"Type", casual:"Casual Leave (CL)", dates:"Dates", days:"Days", balAfter:"CL balance after", approver:"Approver", approverName:"Reporting Officer (B. Hazarika)", eta:"Approval ETA", etaVal:"~4 hours", ref:"Written to SAP", status:"Status",
       payTitle:"Payslip", month:"Month", gross:"Gross earnings", ded:"Deductions", net:"Net pay", download:"Download PDF (QR-verified)",
       claimTitle:"Medical claim", claimId:"Claim", amount:"Amount", expCredit:"Expected credit", steps:["Submitted","Verified","Approved","Paying"],
@@ -485,7 +560,25 @@ const I18N = {
     discB:" दिखाए गए सभी नाम, आँकड़े, पेस्लिप, दावे और SAP संदर्भ केवल उदाहरण-स्वरूप नमूना डेटा हैं, असली रिकॉर्ड नहीं। NRL केवल इच्छित परिनियोजन संदर्भ के रूप में है; यह एक कॉन्सेप्ट डेमो है।",
     foot:"NRL HR Saathi — SAP HCM का संवाद-द्वार · कॉन्सेप्ट डेमो",
     greet:"नमस्ते अर्णब 👋 मैं HR Saathi हूँ। अपनी छुट्टी, पेस्लिप या दावों के बारे में पूछें — लिखें, नीचे शॉर्टकट दबाएँ, या माइक दबाकर बोलें।",
-    quick:["सोमवार से 2 दिन CL लगाओ","मेरी पिछली पेस्लिप दिखाओ","मेरे मेडिकल दावे की स्थिति"],
+    quick:["सोमवार से 2 दिन CL लगाओ","मेरी पिछली पेस्लिप दिखाओ","मेरे मेडिकल दावे की स्थिति","अभी वेतन प्रमाणपत्र"],
+    nudgeChip:"🔔 प्रोएक्टिव सूचना",
+    docReply:"SAP से आपका वेतन प्रमाणपत्र बना रहा हूँ — पासवर्ड-सुरक्षित, QR से कोई भी सत्यापित कर सके।",
+    docCard:{ title:"वेतन प्रमाणपत्र", type:"प्रकार", typeV:"वेतन प्रमाणपत्र", issuedTo:"जारी", verify:"सत्यापन कोड", valid:"QR से सत्यापनीय", download:"PDF डाउनलोड" },
+    nudgeMsg:"सूचना — आपका फायर-सेफ्टी प्रमाणन 12 दिन में समाप्त हो रहा है। क्या मैं रिफ्रेशर बुक कर दूँ ताकि आपका गेट पास वैध रहे?",
+    nudgeWarnTitle:"सुरक्षा प्रमाणन समाप्त हो रहा", nudgeExpires:"समाप्ति में", nudgeExpiresV:"12 दिन", nudgeBook:"रिफ्रेशर बुक करें", nudgeReschedule:"बाद में याद दिलाएँ", nudgeBooked:"बुक ✓ रिफ्रेशर 14 नव, 10:00 — आपके पर्यवेक्षक को बता दिया और SAP अपडेट है।",
+    k5:"HR क्यों समर्थन देगा", h5:"Saathi को क्या अलग बनाता है",
+    sub5:"एक और पोर्टल नहीं। छह चीज़ें जो ESS स्क्रीन नहीं कर सकती — इसीलिए HR, IT और सतर्कता सब हाँ कहते हैं।",
+    features:[
+      {icon:"📄",title:"10 सेकंड में दस्तावेज़",body:"पेस्लिप, फॉर्म 16, वेतन व सेवा प्रमाणपत्र, NOC — पासवर्ड-सुरक्षित और QR-सत्यापनीय, WhatsApp पर। HR डेस्क जाने की ज़रूरत नहीं।",tag:"स्वयं-सेवा"},
+      {icon:"🎓",title:"शून्य SAP प्रशिक्षण",body:"कर्मचारी SAP कभी नहीं देखते। एजेंट उनके लिए लेन-देन चलाता है — सीखने को कुछ नहीं, हेल्पडेस्क टिकट बहुत कम।",tag:"अपनाव"},
+      {icon:"🎙️",title:"शॉप-फ्लोर के लिए वॉइस",body:"बिना लैपटॉप वाला ऑपरेटर असमिया में बोलकर पूछता है और जवाब सुनता है। न ऐप, न टाइपिंग, न पोर्टल।",tag:"समावेश"},
+      {icon:"📌",title:"उत्तर नियम का हवाला",body:"हर नीति-उत्तर सटीक खंड उद्धृत करता है। स्रोत न हो तो Saathi कह देता है और प्रश्न उठाता है — कभी गलत आँकड़ा नहीं।",tag:"भरोसा"},
+      {icon:"🛡️",title:"सतर्कता-स्तर ऑडिट",body:"हर पढ़ना-लिखना दर्ज व हैश-चेन, Why? ड्रॉअर और Undo के साथ। पहले दिन से ऑडिट व सतर्कता के लिए।",tag:"अनुशासन"},
+      {icon:"🔔",title:"Saathi पहले पहुँचता है",body:"समाप्त होता सुरक्षा प्रशिक्षण, लैप्स होती छुट्टी, 12 महीने दूर सेवानिवृत्ति — एजेंट समस्या बनने से पहले याद दिलाता है।",tag:"प्रोएक्टिव"}
+    ],
+    bandH:"2,900 कर्मचारियों की जेब में HR डेस्क दीजिए।",
+    bandP:"वही SAP, वही रिकॉर्ड, वही नियंत्रण — हर कोई अपनी भाषा में इस्तेमाल कर सके वह द्वार।",
+    bandBtn:"डेमो फिर चलाएँ", bandS1:"कम HR-डेस्क लुकअप", bandS2:"घंटे SAP प्रशिक्षण (कर्मचारी)", bandS3:"भाषाएँ, वॉइस सहित",
     cardLbl:{ leaveTitle:"छुट्टी दर्ज हुई", type:"प्रकार", casual:"आकस्मिक छुट्टी (CL)", dates:"तिथियाँ", days:"दिन", balAfter:"CL शेष (बाद में)", approver:"स्वीकर्ता", approverName:"रिपोर्टिंग अधिकारी (B. Hazarika)", eta:"स्वीकृति ETA", etaVal:"~4 घंटे", ref:"SAP में दर्ज", status:"स्थिति",
       payTitle:"पेस्लिप", month:"माह", gross:"कुल आय", ded:"कटौतियाँ", net:"शुद्ध वेतन", download:"PDF डाउनलोड (QR-सत्यापित)",
       claimTitle:"मेडिकल दावा", claimId:"दावा", amount:"राशि", expCredit:"अपेक्षित क्रेडिट", steps:["जमा","सत्यापित","स्वीकृत","भुगतान"],
@@ -528,7 +621,25 @@ const I18N = {
     discB:" দেখুওৱা সকলো নাম, সংখ্যা, পে-স্লিপ, দাবী আৰু SAP তথ্য কেৱল উদাহৰণস্বৰূপ নমুনা তথ্য, প্ৰকৃত ৰেকৰ্ড নহয়। NRL কেৱল অভিপ্ৰেত স্থাপনৰ প্ৰসংগ হিচাপে; এইটো এটা ধাৰণা ডেমো।",
     foot:"NRL HR Saathi — SAP HCM লৈ কথোপকথন দুৱাৰ · ধাৰণা ডেমো",
     greet:"নমস্কাৰ অৰ্ণব 👋 মই HR Saathi। আপোনাৰ ছুটী, পে-স্লিপ বা দাবীৰ বিষয়ে সোধক — লিখক, তলৰ শ্বৰ্টকাট টিপক, বা মাইক টিপি কওক।",
-    quick:["সোমবাৰৰ পৰা ২ দিন CL দিয়ক","মোৰ যোৱা পে-স্লিপ দেখুৱাওক","মোৰ মেডিকেল দাবীৰ স্থিতি"],
+    quick:["সোমবাৰৰ পৰা ২ দিন CL দিয়ক","মোৰ যোৱা পে-স্লিপ দেখুৱাওক","মোৰ মেডিকেল দাবীৰ স্থিতি","এতিয়াই দৰমহা প্ৰমাণপত্ৰ"],
+    nudgeChip:"🔔 আগতীয়া সূচনা",
+    docReply:"SAP ৰ পৰা আপোনাৰ দৰমহা প্ৰমাণপত্ৰ বনাই আছোঁ — পাছৱৰ্ড-সুৰক্ষিত, QR ৰে যিকোনোৱে সত্যাপন কৰিব পাৰে।",
+    docCard:{ title:"দৰমহা প্ৰমাণপত্ৰ", type:"প্ৰকাৰ", typeV:"দৰমহা প্ৰমাণপত্ৰ", issuedTo:"ইছ্যু", verify:"সত্যাপন ক'ড", valid:"QR ৰে সত্যাপনযোগ্য", download:"PDF ডাউনল'ড" },
+    nudgeMsg:"সূচনা — আপোনাৰ ফায়াৰ-ছেফটী প্ৰমাণন ১২ দিনত শেষ হ'ব। আপোনাৰ গেট পাছ বৈধ ৰাখিবলৈ মই ৰিফ্ৰেশাৰ বুক কৰিম নে?",
+    nudgeWarnTitle:"সুৰক্ষা প্ৰমাণন শেষ হ'বলৈ", nudgeExpires:"শেষ হ'ব", nudgeExpiresV:"১২ দিনত", nudgeBook:"ৰিফ্ৰেশাৰ বুক কৰক", nudgeReschedule:"পিছত সোঁৱৰাওক", nudgeBooked:"বুক ✓ ৰিফ্ৰেশাৰ ১৪ নৱে, ১০:০০ — আপোনাৰ চুপাৰভাইজাৰক ক'লোঁ আৰু SAP আপডেট।",
+    k5:"HR এ কিয় সমৰ্থন কৰিব", h5:"Saathi ক কিহে পৃথক কৰে",
+    sub5:"আৰু এটা পৰ্টেল নহয়। ছটা কথা যিবোৰ ESS স্ক্ৰীনে কৰিব নোৱাৰে — সেয়ে HR, IT আৰু সতৰ্কতা সকলোৱে হয় বোলে।",
+    features:[
+      {icon:"📄",title:"১০ ছেকেণ্ডত নথি",body:"পে-স্লিপ, ফৰ্ম ১৬, দৰমহা আৰু সেৱা প্ৰমাণপত্ৰ, NOC — পাছৱৰ্ড-সুৰক্ষিত আৰু QR-সত্যাপনযোগ্য, WhatsApp ত। HR ডেস্কলৈ যাব নালাগে।",tag:"স্ব-সেৱা"},
+      {icon:"🎓",title:"শূন্য SAP প্ৰশিক্ষণ",body:"কৰ্মচাৰীয়ে SAP কেতিয়াও নেদেখে। এজেণ্টে তেওঁলোকৰ বাবে লেনদেন চলায় — শিকিবলৈ একো নাই, হেল্পডেস্ক টিকট বহু কম।",tag:"গ্ৰহণ"},
+      {icon:"🎙️",title:"শ্বপ-ফ্লোৰৰ বাবে কণ্ঠ",body:"লেপটপ নথকা অপাৰেটৰে অসমীয়াত কণ্ঠেৰে সোধে আৰু উত্তৰ শুনে। এপ নাই, টাইপিং নাই, পৰ্টেল নাই।",tag:"অন্তৰ্ভুক্তি"},
+      {icon:"📌",title:"উত্তৰে নিয়ম উদ্ধৃত কৰে",body:"প্ৰতিটো নীতি-উত্তৰে সঠিক ধাৰা উদ্ধৃত কৰে। উৎস নাথাকিলে Saathi এ কয় আৰু প্ৰশ্ন উত্থাপন কৰে — কেতিয়াও ভুল সংখ্যা নহয়।",tag:"বিশ্বাস"},
+      {icon:"🛡️",title:"সতৰ্কতা-মানৰ অডিট",body:"প্ৰতিটো পঢ়া-লিখা নথিভুক্ত আৰু হেশ-চেইন, Why? ড্ৰৱাৰ আৰু Undo ৰ সৈতে। প্ৰথম দিনৰ পৰা অডিট আৰু সতৰ্কতাৰ বাবে।",tag:"শাসন"},
+      {icon:"🔔",title:"Saathi আগেয়ে যোগাযোগ কৰে",body:"শেষ হোৱা সুৰক্ষা প্ৰশিক্ষণ, লেপ্‌ছ হোৱা ছুটী, ১২ মাহ দূৰৰ অৱসৰ — এজেণ্টে সমস্যা হোৱাৰ আগতে সোঁৱৰাই দিয়ে।",tag:"আগতীয়া"}
+    ],
+    bandH:"২,৯০০ কৰ্মচাৰীৰ পকেটত এটা HR ডেস্ক দিয়ক।",
+    bandP:"একেই SAP, একেই ৰেকৰ্ড, একেই নিয়ন্ত্ৰণ — সকলোৱে নিজৰ ভাষাত ব্যৱহাৰ কৰিব পৰা দুৱাৰ।",
+    bandBtn:"ডেমো পুনৰ চলাওক", bandS1:"কম HR-ডেস্ক লুকআপ", bandS2:"ঘণ্টা SAP প্ৰশিক্ষণ (কৰ্মচাৰী)", bandS3:"ভাষা, কণ্ঠ সহ",
     cardLbl:{ leaveTitle:"ছুটী নথিভুক্ত হ'ল", type:"প্ৰকাৰ", casual:"নৈমিত্তিক ছুটী (CL)", dates:"তাৰিখ", days:"দিন", balAfter:"CL বাকী (পিছত)", approver:"অনুমোদক", approverName:"ৰিপ'ৰ্টিং বিষয়া (B. Hazarika)", eta:"অনুমোদন ETA", etaVal:"~৪ ঘণ্টা", ref:"SAP ত লিখা হ'ল", status:"স্থিতি",
       payTitle:"পে-স্লিপ", month:"মাহ", gross:"মুঠ উপাৰ্জন", ded:"কৰ্তন", net:"নিট দৰমহা", download:"PDF ডাউনল'ড (QR-সত্যাপিত)",
       claimTitle:"মেডিকেল দাবী", claimId:"দাবী", amount:"পৰিমাণ", expCredit:"প্ৰত্যাশিত জমা", steps:["দাখিল","সত্যাপিত","অনুমোদিত","পৰিশোধ"],
@@ -568,21 +679,38 @@ function paintStatic() {
   document.documentElement.setAttribute("data-lang", lang);
   $("#chanLabel").textContent = channel === "whatsapp" ? "WhatsApp" : channel === "teams" ? "Teams" : t.intranet;
   paintQuick();
+  paintFeatures();
   paintLangCards();
   paintRaceRest();
+}
+
+function paintFeatures() {
+  const grid = $("#features");
+  if (!grid) return;
+  grid.innerHTML = I18N[lang].features.map(f => `
+    <div class="fcard">
+      <div class="ficon">${f.icon}</div>
+      <h4>${f.title}</h4>
+      <p>${f.body}</p>
+      <span class="tag">${f.tag}</span>
+    </div>`).join("");
 }
 
 function paintQuick() {
   const t = I18N[lang];
   const q = $("#quick");
   q.innerHTML = "";
-  const keys = ["leave","payslip","claim"];
+  const keys = ["leave","payslip","claim","document"];
   t.quick.forEach((label, i) => {
     const b = document.createElement("button");
     b.className = "qr"; b.textContent = label; b.dataset.scenario = keys[i];
     b.addEventListener("click", () => runScenario(keys[i]));
     q.appendChild(b);
   });
+  const nb = document.createElement("button");
+  nb.className = "qr"; nb.textContent = t.nudgeChip;
+  nb.addEventListener("click", runNudge);
+  q.appendChild(nb);
 }
 
 /* ============================ chat rendering ============================ */
@@ -643,6 +771,15 @@ function cardHTML(kind) {
       <div class="c-row"><span>${L.el}</span><span class="num">${s.el} ${L.days2}</span></div>
       <div class="c-row"><span>${L.cl}</span><span class="num">${s.cl} ${L.days2}</span></div></div>`;
   }
+  if (kind === "document") {
+    const d = SHARED.doc, D = I18N[lang].docCard;
+    return `<div class="card"><div class="c-top"><span class="ic">📄</span>${D.title}</div>
+      <div class="c-row"><span>${D.type}</span><span>${D.typeV}</span></div>
+      <div class="c-row"><span>${D.issuedTo}</span><span>${d.emp}</span></div>
+      <div class="c-row"><span>${D.verify}</span><span class="num">${d.code} <span class="pill good">●</span></span></div>
+      <div class="chip-dl">⬇ ${D.download} · 🔒 QR</div>
+      <div class="c-foot">✓ ${D.valid}</div></div>`;
+  }
   return "";
 }
 
@@ -651,8 +788,8 @@ async function runScenario(kind) {
   busy = true;
   setQuick(false);
   const t = I18N[lang];
-  const userText = kind === "leave" ? t.quick[0] : kind === "payslip" ? t.quick[1] : t.quick[2];
-  addMsg("user", userText, "✓✓");
+  const idx = { leave:0, payslip:1, claim:2, document:3 }[kind] ?? 0;
+  addMsg("user", t.quick[idx], "✓✓");
   await wait(500);
   const typ = addTyping(); await wait(950); typ.remove();
 
@@ -663,11 +800,48 @@ async function runScenario(kind) {
     addMsg("bot", t.reply.leaveDone + cardHTML("leave"), "SAP · BAPI_ABSENCE_CREATE");
   } else if (kind === "payslip") {
     addMsg("bot", t.reply.payslip + cardHTML("payslip"), "SAP · OData PT_PAYSLIP");
-  } else {
+  } else if (kind === "claim") {
     addMsg("bot", t.reply.claim + cardHTML("claim"), "SAP · OData claim status");
+  } else {
+    addMsg("bot", t.docReply + cardHTML("document"), "SAP · docs-engine · 8s");
   }
   $("#chat").scrollTop = $("#chat").scrollHeight;
   busy = false; setQuick(true);
+}
+
+async function runNudge() {
+  if (busy) return;
+  busy = true; setQuick(false);
+  const t = I18N[lang], L = t;
+  const typ = addTyping(); await wait(900); typ.remove();
+  const warn = `<div class="card"><div class="c-top"><span class="ic" style="background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)">⚠️</span>${t.nudgeWarnTitle}</div>
+    <div class="c-row"><span>${t.nudgeExpires}</span><span><span class="pill warn">${t.nudgeExpiresV}</span></span></div></div>`;
+  addMsg("bot", t.nudgeMsg + warn, "🔔 SAP · PT training validity");
+  // action chips
+  const chat = $("#chat");
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:7px;align-self:flex-end;flex-wrap:wrap";
+  const yes = document.createElement("button");
+  yes.className = "qr"; yes.style.background = "var(--brand)"; yes.style.color = "var(--brand-ink)"; yes.style.borderColor = "transparent";
+  yes.textContent = t.nudgeBook;
+  const later = document.createElement("button");
+  later.className = "qr"; later.textContent = t.nudgeReschedule;
+  row.appendChild(yes); row.appendChild(later);
+  chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
+  busy = false;
+  const finish = async (booked) => {
+    if (row.dataset.done) return; row.dataset.done = "1";
+    row.remove();
+    addMsg("user", booked ? t.nudgeBook : t.nudgeReschedule, "✓✓");
+    if (booked) {
+      busy = true; const tp = addTyping(); await wait(850); tp.remove();
+      addMsg("bot", t.nudgeBooked, "SAP · training booked");
+      busy = false;
+    }
+    setQuick(true);
+  };
+  yes.addEventListener("click", () => finish(true));
+  later.addEventListener("click", () => finish(false));
 }
 
 function setQuick(on) {
@@ -800,6 +974,7 @@ $("#micBtn").addEventListener("click", runVoice);
 $("#runRace").addEventListener("click", runRaceAnim);
 $("#tryBtn").addEventListener("click", () => { document.querySelector(".phone").scrollIntoView({behavior:reduce?"auto":"smooth", block:"center"}); setTimeout(() => runScenario("leave"), reduce?0:500); });
 $("#raceBtn").addEventListener("click", () => { $("#raceSection").scrollIntoView({behavior:reduce?"auto":"smooth"}); setTimeout(runRaceAnim, reduce?0:600); });
+$("#bandBtn").addEventListener("click", () => { document.querySelector(".phone").scrollIntoView({behavior:reduce?"auto":"smooth", block:"center"}); setTimeout(() => runScenario("leave"), reduce?0:500); });
 $("#themeBtn").addEventListener("click", () => {
   const cur = document.documentElement.getAttribute("data-theme");
   const next = cur === "dark" ? "light" : cur === "light" ? "dark" : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
