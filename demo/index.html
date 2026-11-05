@@ -260,6 +260,16 @@
   .band-stats .b { font-family: var(--font-display); font-weight: 800; font-size: 30px; color: #fff; }
   .band-stats .l { font-size: 12.5px; color: #bfe6d9; max-width: 15ch; }
 
+  .pill.crit { color: var(--crit); background: color-mix(in srgb, var(--crit) 15%, transparent); }
+
+  /* ---- HR on WhatsApp ---- */
+  .hr-grid { display: grid; grid-template-columns: .92fr 1.08fr; gap: 44px; align-items: center; margin-top: 26px; }
+  .hr-points { display: grid; gap: 14px; }
+  .hr-point { display: flex; gap: 12px; align-items: flex-start; font-size: 15.5px; }
+  .hr-point .pk { width: 27px; height: 27px; flex: none; border-radius: 8px; background: color-mix(in srgb, var(--accent) 16%, var(--surface)); color: var(--accent); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .hr-badge { margin-left: auto; font-size: 11px; background: var(--accent); color: #231a08; padding: 3px 9px; border-radius: 999px; font-weight: 800; }
+  #hrSection .ph-head .ph-ava { background: rgba(255,255,255,.22); }
+
   footer { border-top: 1px solid var(--border); padding: 30px 0 50px; color: var(--muted); font-size: 13px; }
   .disc { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; }
   .disc b { color: var(--ink); }
@@ -273,6 +283,7 @@
     .features { grid-template-columns: 1fr; }
     .fcard.span2 { grid-column: span 1; }
     .cta-band { flex-direction: column; align-items: flex-start; padding: 28px; }
+    .hr-grid { grid-template-columns: 1fr; gap: 28px; }
     .brand small { display: none; }
   }
   @media (max-width: 920px) and (min-width: 561px) {
@@ -357,6 +368,40 @@
         <button data-chan-btn="whatsapp" aria-pressed="true">WhatsApp</button>
         <button data-chan-btn="teams" aria-pressed="false">Teams</button>
         <button data-chan-btn="intranet" aria-pressed="false" data-t="intranet">Intranet</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HR ON WHATSAPP -->
+  <section class="block" id="hrSection">
+    <div class="wrap">
+      <span class="kicker" id="hrK">The other side of the number</span>
+      <h2 class="h2" id="hrH">HR runs on the same chat</h2>
+      <p class="sub" id="hrSub"></p>
+      <div class="hr-grid">
+        <div>
+          <div class="hr-points">
+            <div class="hr-point"><span class="pk">1</span><span id="hrB1"></span></div>
+            <div class="hr-point"><span class="pk">2</span><span id="hrB2"></span></div>
+            <div class="hr-point"><span class="pk">3</span><span id="hrB3"></span></div>
+          </div>
+        </div>
+        <div class="phone-shell">
+          <div class="phone" id="hrPhone">
+            <div class="ph-status"><span class="num">9:41</span><span>📶 🔋</span></div>
+            <div class="ph-head">
+              <span class="ph-ava">সা</span>
+              <div>
+                <div class="nm">HR Saathi</div>
+                <div class="st" id="hrPersona">Priya Borah · HR</div>
+              </div>
+              <span class="hr-badge" id="hrBadge">HR officer</span>
+            </div>
+            <div class="ph-body" id="hrChat" aria-live="polite"></div>
+            <div class="ph-quick" id="hrQuick"></div>
+            <div class="ph-input"><span class="fake" data-t="typeHere">Message HR Saathi…</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -468,7 +513,19 @@ const SHARED = {
   payslip: { month: "October 2026", gross: "₹1,24,560", ded: "₹38,210", net: "₹86,350" },
   claim:   { id: "MED-2026-04417", amount: "₹7,480", credit: "08 Nov 2026" },
   voice:   { el: "182", cl: "10" },
-  doc:     { emp: "Arnab Saikia · E-10002", code: "NRL-7F3A21" }
+  doc:     { emp: "Arnab Saikia · E-10002", code: "NRL-7F3A21" },
+  hr: {
+    pendingEmp: "Arnab Saikia · E-10002",
+    expired: [
+      { n: "Nitu Gogoi", c: "E-10234", days: -2 },
+      { n: "Rupam Das", c: "E-10198", days: 3 },
+      { n: "Joydeep Pegu", c: "E-10377", days: 5 },
+      { n: "Hiren Kalita", c: "E-10412", days: 6 },
+      { n: "Simanta Bora", c: "E-10265", days: 9 },
+      { n: "Anup Nath", c: "E-10301", days: 11 }
+    ],
+    cert: { emp: "Bhaskar Das · E-10045", code: "NRL-9C4E07" }
+  }
 };
 
 const I18N = {
@@ -531,7 +588,30 @@ const I18N = {
       voiceA:"You have 182 days of Earned Leave and 10 days of Casual Leave remaining."
     },
     sapSteps:["Log in to SAP Fiori launchpad","Open My Services → Leave Request","Wait for the app to load","Pick leave type: Casual Leave","Select start & end dates","Review and press Send"],
-    sapFoot:"clicks", sapScreens:"screens", saathiMsg:"\"Apply 2 days CL from Monday\" → done.", oneMsg:"message", voiceHint:"Voice · Assamese"
+    sapFoot:"clicks", sapScreens:"screens", saathiMsg:"\"Apply 2 days CL from Monday\" → done.", oneMsg:"message", voiceHint:"Voice · Assamese",
+    hr:{
+      sectionK:"The other side of the number", sectionH:"HR runs on the same chat",
+      sectionSub:"The HR officer's number is bound to their role, so Saathi lets them reach across employees — approve, look up, issue — while an ordinary employee still only ever sees their own data.",
+      b1:"Approve leave right in the thread, with the rule shown",
+      b2:"Ask workforce questions — read-only and role-scoped",
+      b3:"Issue a certificate for any employee in seconds",
+      badge:"HR officer", persona:"Priya Borah · HR",
+      greet:"Hi Priya 👋 You're signed in as HR. I can pull up any employee, clear approvals, answer workforce questions and issue documents. What first?",
+      quick:["Pending leave approvals","Who has expired safety training?","Service certificate for E-10045"],
+      approveIntro:"3 approvals waiting. 1 of 3 — Arnab Saikia, Casual Leave, 2 days (10–11 Nov).",
+      approveRule:"Within the 12-day CL entitlement — clause LEAVE-3.2.",
+      btnApprove:"Approve", btnReject:"Reject",
+      approveDone:"Approved ✓ Written to the system and sent to the reporting officer. 2 approvals left.",
+      rejectDone:"Rejected — the employee is notified with your note. 2 left.",
+      expiredIntro:"6 people in Hydrocracker have safety training expiring or lapsed:",
+      expiredLbl:"expired", inDays:"in {n}d",
+      expiredHint:"Want me to WhatsApp them the refresher booking link?",
+      btnNudgeAll:"Nudge all 6",
+      nudgeAllDone:"Sent ✓ All 6 messaged the refresher link; supervisors cc'd and gate passes flagged.",
+      certIntro:"Service certificate generated from the record — password-protected, with a QR anyone can verify.",
+      certSent:"Delivered to the employee on WhatsApp.",
+      metaApprove:"HR decision · PIN-confirmed · audited", metaQuery:"read-only · role-scoped", metaDoc:"docs-engine · QR"
+    }
   },
   hi: {
     tagline:"SAP पर संवाद-आधारित HR", eyebrow:"लाइव प्रोटोटाइप · नमूना डेटा",
@@ -592,7 +672,30 @@ const I18N = {
       voiceA:"आपके पास 182 दिन अर्जित छुट्टी और 10 दिन आकस्मिक छुट्टी शेष है।"
     },
     sapSteps:["SAP Fiori लॉन्चपैड में लॉग-इन","My Services → Leave Request खोलें","ऐप लोड होने का इंतज़ार","छुट्टी प्रकार चुनें: CL","आरंभ व अंत तिथि चुनें","समीक्षा कर Send दबाएँ"],
-    sapFoot:"क्लिक", sapScreens:"स्क्रीन", saathiMsg:"\"सोमवार से 2 दिन CL लगाओ\" → हो गया।", oneMsg:"संदेश", voiceHint:"वॉइस · असमिया"
+    sapFoot:"क्लिक", sapScreens:"स्क्रीन", saathiMsg:"\"सोमवार से 2 दिन CL लगाओ\" → हो गया।", oneMsg:"संदेश", voiceHint:"वॉइस · असमिया",
+    hr:{
+      sectionK:"नंबर का दूसरा पहलू", sectionH:"HR भी इसी चैट पर काम करता है",
+      sectionSub:"HR अधिकारी का नंबर उनकी भूमिका से जुड़ा है, इसलिए Saathi उन्हें सभी कर्मचारियों तक पहुँच देता है — स्वीकृति, लुकअप, जारी करना — जबकि सामान्य कर्मचारी केवल अपना डेटा देखता है।",
+      b1:"थ्रेड में ही छुट्टी स्वीकृत करें, नियम के साथ",
+      b2:"वर्कफोर्स प्रश्न पूछें — केवल-पढ़ने, भूमिका-सीमित",
+      b3:"किसी भी कर्मचारी का प्रमाणपत्र सेकंडों में जारी करें",
+      badge:"HR अधिकारी", persona:"प्रिया बोरा · HR",
+      greet:"नमस्ते प्रिया 👋 आप HR के रूप में साइन-इन हैं। मैं किसी भी कर्मचारी को देख सकता हूँ, स्वीकृतियाँ निपटा सकता हूँ, प्रश्न और दस्तावेज़ दे सकता हूँ। पहले क्या?",
+      quick:["लंबित छुट्टी स्वीकृतियाँ","किसकी सुरक्षा ट्रेनिंग समाप्त?","E-10045 का सेवा प्रमाणपत्र"],
+      approveIntro:"3 स्वीकृतियाँ लंबित। 1 में से 3 — अर्णब सैकिया, आकस्मिक छुट्टी, 2 दिन (10–11 नव)।",
+      approveRule:"12-दिन CL पात्रता के भीतर — खंड LEAVE-3.2।",
+      btnApprove:"स्वीकृत", btnReject:"अस्वीकृत",
+      approveDone:"स्वीकृत ✓ सिस्टम में दर्ज और रिपोर्टिंग अधिकारी को भेजा। 2 शेष।",
+      rejectDone:"अस्वीकृत — कर्मचारी को आपकी टिप्पणी के साथ सूचित किया। 2 शेष।",
+      expiredIntro:"हाइड्रोक्रैकर में 6 लोगों की सुरक्षा ट्रेनिंग समाप्त/समाप्त हो रही है:",
+      expiredLbl:"समाप्त", inDays:"{n} दिन में",
+      expiredHint:"क्या मैं उन्हें रिफ्रेशर बुकिंग लिंक WhatsApp कर दूँ?",
+      btnNudgeAll:"सभी 6 को सूचित करें",
+      nudgeAllDone:"भेजा ✓ सभी 6 को रिफ्रेशर लिंक; पर्यवेक्षक cc और गेट पास चिह्नित।",
+      certIntro:"रिकॉर्ड से सेवा प्रमाणपत्र बना — पासवर्ड-सुरक्षित, QR से कोई भी सत्यापित कर सके।",
+      certSent:"कर्मचारी को WhatsApp पर भेजा।",
+      metaApprove:"HR निर्णय · PIN-पुष्ट · दर्ज", metaQuery:"केवल-पढ़ने · भूमिका-सीमित", metaDoc:"docs-engine · QR"
+    }
   },
   as: {
     tagline:"SAP ৰ ওপৰত কথোপকথন HR", eyebrow:"লাইভ প্ৰ'ট'টাইপ · নমুনা তথ্য",
@@ -653,7 +756,30 @@ const I18N = {
       voiceA:"আপোনাৰ ১৮২ দিন অৰ্জিত ছুটী আৰু ১০ দিন নৈমিত্তিক ছুটী বাকী আছে।"
     },
     sapSteps:["SAP Fiori লঞ্চপেডত লগ-ইন","My Services → Leave Request খোলক","এপ ল'ড হোৱালৈ ৰখক","ছুটী প্ৰকাৰ বাছক: CL","আৰম্ভ আৰু শেষ তাৰিখ বাছক","পৰ্যালোচনা কৰি Send টিপক"],
-    sapFoot:"ক্লিক", sapScreens:"স্ক্ৰীন", saathiMsg:"\"সোমবাৰৰ পৰা ২ দিন CL দিয়ক\" → হ'ল।", oneMsg:"বাৰ্তা", voiceHint:"কণ্ঠ · অসমীয়া"
+    sapFoot:"ক্লিক", sapScreens:"স্ক্ৰীন", saathiMsg:"\"সোমবাৰৰ পৰা ২ দিন CL দিয়ক\" → হ'ল।", oneMsg:"বাৰ্তা", voiceHint:"কণ্ঠ · অসমীয়া",
+    hr:{
+      sectionK:"নম্বৰটোৰ আন ফাল", sectionH:"HR এও একেই চেটত কাম কৰে",
+      sectionSub:"HR বিষয়াৰ নম্বৰ তেওঁৰ ভূমিকাৰ সৈতে সংযুক্ত, গতিকে Saathi এ তেওঁক সকলো কৰ্মচাৰীলৈ পহুঁচ দিয়ে — অনুমোদন, লুকআপ, ইছ্যু — আনহাতে সাধাৰণ কৰ্মচাৰীয়ে কেৱল নিজৰ তথ্য দেখে।",
+      b1:"থ্ৰেডতেই ছুটী অনুমোদন কৰক, নিয়মৰ সৈতে",
+      b2:"কৰ্মীবাহিনীৰ প্ৰশ্ন সোধক — কেৱল-পঢ়া, ভূমিকা-সীমিত",
+      b3:"যিকোনো কৰ্মচাৰীৰ প্ৰমাণপত্ৰ ছেকেণ্ডতে ইছ্যু কৰক",
+      badge:"HR বিষয়া", persona:"প্ৰিয়া বৰা · HR",
+      greet:"নমস্কাৰ প্ৰিয়া 👋 আপুনি HR হিচাপে ছাইন-ইন। মই যিকোনো কৰ্মচাৰী চাব পাৰোঁ, অনুমোদন নিষ্পত্তি কৰিব পাৰোঁ, প্ৰশ্ন আৰু নথি দিব পাৰোঁ। প্ৰথমে কি?",
+      quick:["বাকী থকা ছুটী অনুমোদন","কাৰ সুৰক্ষা ট্ৰেইনিং শেষ?","E-10045 ৰ সেৱা প্ৰমাণপত্ৰ"],
+      approveIntro:"3 অনুমোদন বাকী। 3 ৰ ভিতৰত 1 — অৰ্ণব সৈকিয়া, নৈমিত্তিক ছুটী, 2 দিন (10–11 নৱে)।",
+      approveRule:"12-দিন CL অধিকাৰৰ ভিতৰত — ধাৰা LEAVE-3.2।",
+      btnApprove:"অনুমোদন", btnReject:"অগ্ৰাহ্য",
+      approveDone:"অনুমোদিত ✓ ছিষ্টেমত লিখা আৰু ৰিপ'ৰ্টিং বিষয়াক পঠোৱা হ'ল। 2 বাকী।",
+      rejectDone:"অগ্ৰাহ্য — কৰ্মচাৰীক আপোনাৰ টোকাৰ সৈতে জনোৱা হ'ল। 2 বাকী।",
+      expiredIntro:"হাইড্ৰ'ক্ৰেকাৰত 6 জনৰ সুৰক্ষা ট্ৰেইনিং শেষ/শেষ হ'বলৈ:",
+      expiredLbl:"শেষ", inDays:"{n} দিনত",
+      expiredHint:"মই তেওঁলোকক ৰিফ্ৰেশাৰ বুকিং লিংক WhatsApp কৰিম নে?",
+      btnNudgeAll:"৬ জনক সূচিত কৰক",
+      nudgeAllDone:"পঠোৱা হ'ল ✓ ৬ জনক ৰিফ্ৰেশাৰ লিংক; চুপাৰভাইজাৰ cc আৰু গেট পাছ চিহ্নিত।",
+      certIntro:"ৰেকৰ্ডৰ পৰা সেৱা প্ৰমাণপত্ৰ বনা হ'ল — পাছৱৰ্ড-সুৰক্ষিত, QR ৰে যিকোনোৱে সত্যাপন কৰিব পাৰে।",
+      certSent:"কৰ্মচাৰীক WhatsApp ত পঠোৱা হ'ল।",
+      metaApprove:"HR সিদ্ধান্ত · PIN-নিশ্চিত · অডিটেড", metaQuery:"কেৱল-পঢ়া · ভূমিকা-সীমিত", metaDoc:"docs-engine · QR"
+    }
   }
 };
 
@@ -680,8 +806,103 @@ function paintStatic() {
   $("#chanLabel").textContent = channel === "whatsapp" ? "WhatsApp" : channel === "teams" ? "Teams" : t.intranet;
   paintQuick();
   paintFeatures();
+  paintHr();
   paintLangCards();
   paintRaceRest();
+}
+
+/* ---- HR on WhatsApp ---- */
+let hrBusy = false;
+function paintHr() {
+  const h = I18N[lang].hr;
+  const map = { hrK:"sectionK", hrH:"sectionH", hrSub:"sectionSub", hrB1:"b1", hrB2:"b2", hrB3:"b3", hrPersona:"persona", hrBadge:"badge" };
+  for (const id in map) { const el = $("#" + id); if (el) el.textContent = h[map[id]]; }
+  const q = $("#hrQuick"); if (!q) return;
+  q.innerHTML = "";
+  const keys = ["approve","expired","cert"];
+  h.quick.forEach((label, i) => {
+    const b = document.createElement("button");
+    b.className = "qr"; b.textContent = label;
+    b.addEventListener("click", () => hrRun(keys[i]));
+    q.appendChild(b);
+  });
+}
+function hrReset() { const c = $("#hrChat"); if (!c) return; c.innerHTML = ""; addMsg("bot", I18N[lang].hr.greet, null, c); }
+function hrSetQuick(on) { document.querySelectorAll("#hrQuick .qr").forEach(b => b.disabled = !on); }
+
+function hrActionRow(chat, primary, secondary, onChoose) {
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:7px;align-self:flex-end;flex-wrap:wrap";
+  const p = document.createElement("button");
+  p.className = "qr"; p.style.background = "var(--brand)"; p.style.color = "var(--brand-ink)"; p.style.borderColor = "transparent";
+  p.textContent = primary; row.appendChild(p);
+  let s = null;
+  if (secondary) { s = document.createElement("button"); s.className = "qr"; s.textContent = secondary; row.appendChild(s); }
+  chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
+  const choose = (ok) => { if (row.dataset.done) return; row.dataset.done = "1"; row.remove(); onChoose(ok); };
+  p.addEventListener("click", () => choose(true));
+  if (s) s.addEventListener("click", () => choose(false));
+}
+
+function approveCard(h) {
+  const L = I18N[lang].cardLbl;
+  return `<div class="card"><div class="c-top"><span class="ic">🗓️</span>${SHARED.hr.pendingEmp}</div>
+    <div class="c-row"><span>${L.type}</span><span>${L.casual}</span></div>
+    <div class="c-row"><span>${L.days}</span><span class="num">2</span></div>
+    <div class="c-foot">📌 ${h.approveRule}</div></div>`;
+}
+function expiredCard(h) {
+  const rows = SHARED.hr.expired.map(e => {
+    const exp = e.days < 0;
+    const label = exp ? h.expiredLbl : h.inDays.replace("{n}", String(e.days));
+    return `<div class="c-row"><span>${e.n} · ${e.c}</span><span><span class="pill ${exp ? "crit" : "warn"}">${label}</span></span></div>`;
+  }).join("");
+  return `<div class="card"><div class="c-top"><span class="ic" style="background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)">⚠️</span>Hydrocracker · ${SHARED.hr.expired.length}</div>${rows}<div class="c-foot">${h.expiredHint}</div></div>`;
+}
+function hrCertCard(h) {
+  const D = I18N[lang].docCard, c = SHARED.hr.cert;
+  return `<div class="card"><div class="c-top"><span class="ic">📄</span>${D.title}</div>
+    <div class="c-row"><span>${D.issuedTo}</span><span>${c.emp}</span></div>
+    <div class="c-row"><span>${D.verify}</span><span class="num">${c.code} <span class="pill good">●</span></span></div>
+    <div class="chip-dl">⬇ ${D.download} · 🔒 QR</div></div>`;
+}
+
+async function hrRun(kind) {
+  if (hrBusy) return;
+  hrBusy = true; hrSetQuick(false);
+  const h = I18N[lang].hr, chat = $("#hrChat");
+  const idx = { approve:0, expired:1, cert:2 }[kind] ?? 0;
+  addMsg("user", h.quick[idx], "✓✓", chat);
+  await wait(500);
+  const typ = addTyping(chat); await wait(950); typ.remove();
+
+  if (kind === "approve") {
+    addMsg("bot", h.approveIntro + approveCard(h), h.metaQuery, chat);
+    hrBusy = false;
+    hrActionRow(chat, h.btnApprove, h.btnReject, async (ok) => {
+      addMsg("user", ok ? h.btnApprove : h.btnReject, "✓✓", chat);
+      hrBusy = true; const tp = addTyping(chat); await wait(850); tp.remove();
+      addMsg("bot", ok ? h.approveDone : h.rejectDone, h.metaApprove, chat);
+      hrBusy = false; hrSetQuick(true);
+    });
+    return;
+  }
+  if (kind === "expired") {
+    addMsg("bot", h.expiredIntro + expiredCard(h), h.metaQuery, chat);
+    hrBusy = false;
+    hrActionRow(chat, h.btnNudgeAll, null, async () => {
+      addMsg("user", h.btnNudgeAll, "✓✓", chat);
+      hrBusy = true; const tp = addTyping(chat); await wait(850); tp.remove();
+      addMsg("bot", h.nudgeAllDone, "bulk WhatsApp · audited", chat);
+      hrBusy = false; hrSetQuick(true);
+    });
+    return;
+  }
+  // cert
+  addMsg("bot", h.certIntro + hrCertCard(h), h.metaDoc, chat);
+  await wait(700);
+  addMsg("bot", h.certSent, null, chat);
+  hrBusy = false; hrSetQuick(true);
 }
 
 function paintFeatures() {
@@ -714,8 +935,8 @@ function paintQuick() {
 }
 
 /* ============================ chat rendering ============================ */
-function addMsg(who, text, meta) {
-  const chat = $("#chat");
+function addMsg(who, text, meta, chat) {
+  chat = chat || $("#chat");
   const d = document.createElement("div");
   d.className = "msg " + who;
   d.innerHTML = `<div>${text}</div>` + (meta ? `<div class="meta">${meta}</div>` : "");
@@ -723,8 +944,8 @@ function addMsg(who, text, meta) {
   chat.scrollTop = chat.scrollHeight;
   return d;
 }
-function addTyping() {
-  const chat = $("#chat");
+function addTyping(chat) {
+  chat = chat || $("#chat");
   const d = document.createElement("div");
   d.className = "typing"; d.innerHTML = "<i></i><i></i><i></i>";
   chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
@@ -960,6 +1181,7 @@ function setLang(l) {
   document.querySelectorAll("[data-lang-btn]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.langBtn === l)));
   paintStatic();
   resetChat();
+  hrReset();
 }
 function setChannel(c) {
   channel = c;
@@ -986,6 +1208,7 @@ if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = () => 
 
 paintStatic();
 resetChat();
+hrReset();
 </script>
 </body>
 </html>
