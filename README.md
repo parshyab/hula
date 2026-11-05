@@ -1,4 +1,4 @@
-# Saathi HRMS — agent-first HRMS for Numaligarh Refinery Limited (NRL)
+# Saathi HRMS — agent-first HRMS
 
 A standalone, mobile-first HRMS. Our own system of record — **no SAP**. Agents
 prepare the work; humans decide it. English, Hindi and Assamese throughout.
