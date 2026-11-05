@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en" data-channel="whatsapp">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NRL HR Saathi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700&family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  /* NRL HR Saathi — conversational front door over SAP ESS. Pitch demo.
+     Layout: sticky header; hero with live chat phone; demo controls;
+     SAP-vs-Saathi race; architecture; languages/voice; footer.
+     Palette: tea-garden teal brand + sand accent, light & dark tokens. */
+  :root {
+    --bg: #f3f7f5;
+    --surface: #ffffff;
+    --surface-2: #e9f1ed;
+    --surface-3: #dfeae5;
+    --border: #d4e1db;
+    --ink: #0b241f;
+    --muted: #566d66;
+    --brand: #0d7c66;
+    --brand-2: #179a7d;
+    --brand-ink: #ffffff;
+    --accent: #bd7f24;
+    --accent-soft: #f6ead2;
+    --good: #0d7c66;
+    --warn: #b0791d;
+    --crit: #b4232a;
+    --shadow: 0 1px 2px rgba(11,36,31,.06), 0 12px 30px -16px rgba(11,36,31,.28);
+    --font-display: 'Bricolage Grotesque', 'Noto Sans Devanagari', 'Noto Sans Bengali', system-ui, sans-serif;
+    --font-body: 'Hanken Grotesk', 'Noto Sans Devanagari', 'Noto Sans Bengali', system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #06130f;
+      --surface: #0c241f;
+      --surface-2: #103029;
+      --surface-3: #143a31;
+      --border: #1d473c;
+      --ink: #e7f1ed;
+      --muted: #9fb6ad;
+      --brand: #37b394;
+      --brand-2: #6fd1b6;
+      --brand-ink: #042520;
+      --accent: #e0b15a;
+      --accent-soft: #2a2213;
+      --good: #4cc3a2;
+      --warn: #e0b15a;
+      --crit: #f0888c;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 40px -20px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #06130f; --surface: #0c241f; --surface-2: #103029; --surface-3: #143a31;
+    --border: #1d473c; --ink: #e7f1ed; --muted: #9fb6ad; --brand: #37b394;
+    --brand-2: #6fd1b6; --brand-ink: #042520; --accent: #e0b15a; --accent-soft: #2a2213;
+    --good: #4cc3a2; --warn: #e0b15a; --crit: #f0888c;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 40px -20px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.08; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .wrap { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---- header ---- */
+  header {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar { display: flex; align-items: center; gap: 14px; padding: 12px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -.01em; }
+  .mark {
+    width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+    background: linear-gradient(145deg, var(--brand-2), var(--brand)); color: var(--brand-ink);
+    font-family: var(--font-display); font-weight: 800; font-size: 17px;
+  }
+  .brand small { font-family: var(--font-body); font-weight: 500; color: var(--muted); font-size: 12px; display: block; letter-spacing: 0; }
+  .spacer { flex: 1; }
+  .seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px; }
+  .seg button {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 0; background: transparent; color: var(--muted);
+    padding: 6px 12px; border-radius: 999px; min-height: 34px;
+  }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .ghost { font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--ink); padding: 7px 12px; border-radius: 999px; min-height: 34px; }
+
+  /* ---- hero ---- */
+  .hero { padding: 48px 0 24px; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 44px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--brand); background: var(--surface-2); border: 1px solid var(--border); padding: 5px 11px; border-radius: 999px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 60%, transparent); animation: pulse 2.4s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 55%,transparent)} 70%{box-shadow:0 0 0 9px transparent} 100%{box-shadow:0 0 0 0 transparent} }
+  h1.title { font-size: clamp(34px, 5.4vw, 58px); font-weight: 800; letter-spacing: -.02em; margin: 18px 0 0; }
+  h1.title .hl { color: var(--brand); }
+  .lede { margin-top: 18px; font-size: clamp(16px, 1.7vw, 19px); color: var(--muted); max-width: 34ch; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .btn { font: inherit; font-weight: 700; cursor: pointer; border-radius: 11px; padding: 12px 18px; min-height: 48px; display: inline-flex; align-items: center; gap: 9px; border: 1px solid transparent; }
+  .btn.primary { background: var(--brand); color: var(--brand-ink); }
+  .btn.primary:hover { background: var(--brand-2); }
+  .btn.secondary { background: var(--surface); color: var(--ink); border-color: var(--border); }
+  .stat-row { display: flex; gap: 26px; margin-top: 34px; flex-wrap: wrap; }
+  .stat .big { font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--ink); letter-spacing: -.01em; }
+  .stat .lbl { font-size: 12.5px; color: var(--muted); margin-top: 2px; max-width: 18ch; }
+
+  /* ---- phone ---- */
+  .phone-shell { display: flex; justify-content: center; }
+  .phone {
+    width: 340px; max-width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 36px; box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column;
+    height: 620px; position: relative;
+  }
+  .ph-status { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 4px; font-size: 12px; color: var(--muted); }
+  .ph-head { display: flex; align-items: center; gap: 11px; padding: 10px 16px; color: #fff; }
+  [data-channel="whatsapp"] .ph-head { background: #0b7a63; }
+  [data-channel="teams"] .ph-head { background: #4b53bc; }
+  [data-channel="intranet"] .ph-head { background: linear-gradient(120deg, var(--brand), var(--brand-2)); }
+  .ph-ava { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.2); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; }
+  .ph-head .nm { font-weight: 700; font-size: 15px; line-height: 1.1; }
+  .ph-head .st { font-size: 11.5px; opacity: .85; }
+  .ph-chan { margin-left: auto; font-size: 11px; background: rgba(255,255,255,.18); padding: 3px 9px; border-radius: 999px; }
+  .ph-body {
+    flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 9px;
+    background:
+      radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--brand) 7%, transparent), transparent 40%),
+      var(--surface-2);
+  }
+  .msg { max-width: 82%; padding: 9px 12px; border-radius: 15px; font-size: 14px; line-height: 1.42; box-shadow: 0 1px 1px rgba(0,0,0,.05); animation: pop .26s ease; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+  .msg.bot { align-self: flex-start; background: var(--surface); color: var(--ink); border-bottom-left-radius: 5px; }
+  .msg.user { align-self: flex-end; background: var(--brand); color: var(--brand-ink); border-bottom-right-radius: 5px; }
+  .msg .meta { font-size: 11px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+  .msg.user .meta { color: rgba(255,255,255,.8); }
+  .typing { align-self: flex-start; display: inline-flex; gap: 4px; padding: 12px 14px; background: var(--surface); border-radius: 15px; border-bottom-left-radius: 5px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+  .typing i:nth-child(2){ animation-delay:.18s } .typing i:nth-child(3){ animation-delay:.36s }
+  @keyframes blink { 0%,60%,100%{opacity:.3; transform: translateY(0)} 30%{opacity:1; transform: translateY(-3px)} }
+
+  /* rich cards inside chat */
+  .card { margin-top: 8px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .card .c-top { padding: 9px 12px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .c-top .ic { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; background: var(--surface-2); color: var(--brand); }
+  .card .c-row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 12px; font-size: 12.5px; }
+  .card .c-row span:first-child { color: var(--muted); }
+  .card .c-row span:last-child { font-weight: 600; text-align: right; }
+  .c-foot { padding: 8px 12px; background: var(--surface-2); font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .pill.good { color: var(--good); background: color-mix(in srgb, var(--good) 15%, transparent); }
+  .pill.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+  .chip-dl { margin: 6px 12px 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--brand); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+  /* claim stepper */
+  .steps { display: flex; padding: 12px 12px 8px; gap: 0; }
+  .step { flex: 1; text-align: center; position: relative; font-size: 10.5px; color: var(--muted); }
+  .step .k { width: 16px; height: 16px; border-radius: 50%; background: var(--surface-3); border: 2px solid var(--border); margin: 0 auto 5px; display: grid; place-items: center; }
+  .step.done .k { background: var(--good); border-color: var(--good); }
+  .step.active .k { border-color: var(--brand); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 18%, transparent); }
+  .step.done, .step.active { color: var(--ink); font-weight: 600; }
+  .step:not(:last-child)::after { content: ""; position: absolute; top: 7px; left: 60%; width: 80%; height: 2px; background: var(--border); }
+  .step.done:not(:last-child)::after { background: var(--good); }
+
+  .ph-quick { display: flex; gap: 7px; padding: 9px 10px; overflow-x: auto; border-top: 1px solid var(--border); background: var(--surface); }
+  .qr { white-space: nowrap; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); border-radius: 999px; padding: 7px 12px; min-height: 36px; }
+  .qr:hover { border-color: var(--brand); color: var(--brand); }
+  .qr[disabled] { opacity: .5; cursor: default; }
+  .ph-input { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-top: 1px solid var(--border); background: var(--surface); }
+  .ph-input .fake { flex: 1; font-size: 13px; color: var(--muted); padding: 9px 12px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--border); }
+  .mic { width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; background: var(--brand); color: var(--brand-ink); display: grid; place-items: center; flex: none; }
+  .mic.live { animation: mic 1s infinite; }
+  @keyframes mic { 0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 55%,transparent)} 70%{box-shadow:0 0 0 12px transparent} }
+  .wave { display: none; align-items: center; justify-content: center; gap: 3px; height: 22px; }
+  .wave.on { display: flex; }
+  .wave i { width: 3px; background: var(--brand); border-radius: 2px; animation: wv .8s ease-in-out infinite; }
+  @keyframes wv { 0%,100%{height:5px} 50%{height:20px} }
+
+  /* ---- generic section ---- */
+  section.block { padding: 54px 0; border-top: 1px solid var(--border); }
+  .kicker { font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .h2 { font-size: clamp(24px, 3.2vw, 36px); font-weight: 800; letter-spacing: -.02em; margin-top: 10px; }
+  .sub { color: var(--muted); margin-top: 10px; max-width: 58ch; font-size: 16px; }
+
+  /* ---- race ---- */
+  .race { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 26px; }
+  .lane { border: 1px solid var(--border); border-radius: 16px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
+  .lane.sap { border-color: color-mix(in srgb, var(--crit) 40%, var(--border)); }
+  .lane.saathi { border-color: color-mix(in srgb, var(--brand) 45%, var(--border)); }
+  .lane-head { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .lane-head .t { font-family: var(--font-display); font-weight: 800; font-size: 16px; }
+  .lane.sap .lane-head { background: color-mix(in srgb, var(--crit) 8%, var(--surface)); }
+  .lane.saathi .lane-head { background: color-mix(in srgb, var(--brand) 9%, var(--surface)); }
+  .clock { font-family: var(--font-display); font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .lane-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-height: 230px; }
+  .rstep { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); opacity: .4; transition: opacity .25s, color .25s; }
+  .rstep .n { width: 22px; height: 22px; flex: none; border-radius: 6px; background: var(--surface-2); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .rstep.on { opacity: 1; color: var(--ink); }
+  .rstep.on .n { background: var(--crit); color: #fff; }
+  .lane.saathi .rstep.on .n { background: var(--brand); color: var(--brand-ink); }
+  .rtail { margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; gap: 16px; font-size: 12.5px; }
+  .rtail b { font-family: var(--font-display); font-size: 18px; display: block; }
+  .saathi-bubble { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; border-bottom-left-radius: 5px; padding: 11px 13px; font-size: 14px; max-width: 95%; }
+
+  /* ---- architecture ---- */
+  .arch { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 14px; align-items: stretch; margin-top: 28px; }
+  .node { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow); }
+  .node h4 { font-family: var(--font-display); font-size: 15px; margin: 0; }
+  .node ul { margin: 4px 0 0; padding-left: 16px; color: var(--muted); font-size: 12.5px; }
+  .node.core { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 6%, var(--surface)); }
+  .node.sapn { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+  .arrow { align-self: center; color: var(--muted); font-weight: 700; display: grid; place-items: center; }
+  .arrow small { display: block; font-size: 10px; max-width: 72px; text-align: center; margin-top: 3px; }
+  .guard { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .guard span { font-size: 12.5px; font-weight: 600; color: var(--ink); background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; display: inline-flex; gap: 7px; align-items: center; }
+  .guard span::before { content: "✓"; color: var(--good); font-weight: 800; }
+
+  /* ---- lang cards ---- */
+  .lang-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 24px; }
+  .lcard { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 18px; }
+  .lcard .big { font-family: var(--font-display); font-size: 22px; font-weight: 800; }
+  .lcard .q { margin-top: 10px; font-size: 15px; color: var(--ink); }
+  .lcard .a { margin-top: 8px; font-size: 13px; color: var(--muted); border-left: 3px solid var(--brand); padding-left: 10px; }
+
+  footer { border-top: 1px solid var(--border); padding: 30px 0 50px; color: var(--muted); font-size: 13px; }
+  .disc { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; }
+  .disc b { color: var(--ink); }
+
+  @media (max-width: 920px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+    .race { grid-template-columns: 1fr; }
+    .arch { grid-template-columns: 1fr; }
+    .arch .arrow { transform: rotate(90deg); justify-self: center; }
+    .lang-grid { grid-template-columns: 1fr; }
+    .brand small { display: none; }
+  }
+  @media (max-width: 560px) {
+    .seg.chan { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+  .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <div class="brand">
+      <span class="mark">সা</span>
+      <span>NRL HR Saathi<small data-t="tagline">Conversational HR over SAP</small></span>
+    </div>
+    <span class="spacer"></span>
+    <div class="seg" role="group" aria-label="Language">
+      <button data-lang-btn="en" aria-pressed="true">EN</button>
+      <button data-lang-btn="hi" aria-pressed="false">हिं</button>
+      <button data-lang-btn="as" aria-pressed="false">অস</button>
+    </div>
+    <button class="ghost" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span><span data-t="eyebrow">Live prototype · dummy data</span></span>
+        <h1 class="title" data-t="title">Employees never need to <span class="hl" data-t="titleHl">learn SAP</span>.</h1>
+        <p class="lede" data-t="lede">One chat or voice message does what SAP ESS makes them click through six screens for — in English, Hindi and Assamese.</p>
+        <div class="cta-row">
+          <button class="btn primary" id="tryBtn" data-t="ctaTry">Try the demo</button>
+          <button class="btn secondary" id="raceBtn" data-t="ctaRace">See the time saved</button>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><div class="big num" data-t="s1n">1 message</div><div class="lbl" data-t="s1l">replaces the full ESS leave-request flow</div></div>
+          <div class="stat"><div class="big num" data-t="s2n">3 languages</div><div class="lbl" data-t="s2l">+ voice for shift & shop-floor staff</div></div>
+          <div class="stat"><div class="big num" data-t="s3n">SAP = source of truth</div><div class="lbl" data-t="s3l">agent reads/writes via BAPIs & OData</div></div>
+        </div>
+      </div>
+
+      <!-- PHONE -->
+      <div class="phone-shell">
+        <div class="phone" id="phone">
+          <div class="ph-status"><span class="num">9:41</span><span>📶 🔋</span></div>
+          <div class="ph-head">
+            <span class="ph-ava">সা</span>
+            <div>
+              <div class="nm">HR Saathi</div>
+              <div class="st" data-t="online">online · replies instantly</div>
+            </div>
+            <span class="ph-chan" id="chanLabel">WhatsApp</span>
+          </div>
+          <div class="ph-body" id="chat" aria-live="polite"></div>
+          <div class="ph-quick" id="quick"></div>
+          <div class="ph-input">
+            <span class="fake" id="fakeInput" data-t="typeHere">Message HR Saathi…</span>
+            <div class="wave" id="wave" aria-hidden="true"><i style="height:8px"></i><i style="height:16px"></i><i style="height:11px"></i><i style="height:19px"></i><i style="height:7px"></i></div>
+            <button class="mic" id="micBtn" aria-label="Voice query"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10a7 7 0 0 1-14 0M12 19v3"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANNELS / CONTROLS -->
+  <section class="block" style="padding-top:34px">
+    <div class="wrap">
+      <span class="kicker" data-t="k1">One agent, every doorway</span>
+      <h2 class="h2" data-t="h1">Meet employees where they already are</h2>
+      <p class="sub" data-t="sub1">The same assistant runs on WhatsApp, Microsoft Teams, the intranet portal and a voice line. Switch the channel and run a request — nothing else changes.</p>
+      <div class="seg chan" role="group" aria-label="Channel" style="margin-top:18px">
+        <button data-chan-btn="whatsapp" aria-pressed="true">WhatsApp</button>
+        <button data-chan-btn="teams" aria-pressed="false">Teams</button>
+        <button data-chan-btn="intranet" aria-pressed="false" data-t="intranet">Intranet</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RACE -->
+  <section class="block" id="raceSection">
+    <div class="wrap">
+      <span class="kicker" data-t="k2">The 2-minute gap</span>
+      <h2 class="h2" data-t="h2">Apply for 2 days casual leave</h2>
+      <p class="sub" data-t="sub2">Same task, same SAP backend. On the left, today's ESS click-path. On the right, HR Saathi. Press play.</p>
+      <div style="margin-top:18px"><button class="btn primary" id="runRace" data-t="runRace">▶ Run the race</button></div>
+      <div class="race">
+        <div class="lane sap">
+          <div class="lane-head"><span class="t" data-t="sapTitle">SAP ESS portal</span><span class="clock num" id="sapClock">0:00</span></div>
+          <div class="lane-body" id="sapLane"></div>
+        </div>
+        <div class="lane saathi">
+          <div class="lane-head"><span class="t">HR Saathi</span><span class="clock num" id="saathiClock">0:00</span></div>
+          <div class="lane-body" id="saathiLane"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section class="block">
+    <div class="wrap">
+      <span class="kicker" data-t="k3">How it fits</span>
+      <h2 class="h2" data-t="h3">SAP stays the system of record</h2>
+      <p class="sub" data-t="sub3">Saathi is a conversation layer, not a new HR system. It understands the request, checks who's asking, and calls the SAP transactions employees would otherwise run by hand — then writes the result straight back into SAP.</p>
+      <div class="arch">
+        <div class="node">
+          <h4 data-t="n1t">Employee</h4>
+          <ul><li data-t="n1a">WhatsApp / Teams</li><li data-t="n1b">Intranet portal</li><li data-t="n1c">Voice line (IVR)</li></ul>
+        </div>
+        <div class="arrow">→<small data-t="ar1">plain language</small></div>
+        <div class="node core">
+          <h4 data-t="n2t">HR Saathi agent</h4>
+          <ul><li data-t="n2a">Understands intent (EN/HI/AS)</li><li data-t="n2b">RBAC — sees only your data</li><li data-t="n2c">Every action audited</li></ul>
+        </div>
+        <div class="arrow">→<small data-t="ar2">BAPI / OData</small></div>
+        <div class="node sapn">
+          <h4 data-t="n3t">SAP HCM</h4>
+          <ul><li data-t="n3a">PA / PT / Payroll infotypes</li><li data-t="n3b">Leave, payslip, claims</li><li data-t="n3c">System of record</li></ul>
+        </div>
+      </div>
+      <div class="guard">
+        <span data-t="g1">No parallel database</span>
+        <span data-t="g2">Writes go through standard BAPIs</span>
+        <span data-t="g3">Reads scoped to the logged-in employee</span>
+        <span data-t="g4">Full audit trail for vigilance</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LANGUAGES -->
+  <section class="block">
+    <div class="wrap">
+      <span class="kicker" data-t="k4">Built for the plant floor</span>
+      <h2 class="h2" data-t="h4">Ask in your own language — or just say it</h2>
+      <p class="sub" data-t="sub4">A shift operator with no laptop and no patience for a portal can ask by voice in Assamese and hear the answer back. Tap a card to run it in the chat above.</p>
+      <div class="lang-grid" id="langGrid"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="disc">
+        <b data-t="discT">Prototype for discussion.</b>
+        <span data-t="discB"> All names, numbers, payslips, claims and SAP references shown are illustrative dummy data, not real employee records. NRL is referenced as the intended deployment context; this is a concept demo, not a live system.</span>
+      </div>
+      <div data-t="foot">NRL HR Saathi — conversational front door to SAP HCM · concept demo</div>
+    </div>
+  </footer>
+</main>
+
+<script>
+/* ============================ DATA ============================ */
+const SHARED = {
+  leave:   { ref: "2000012345", dates: "Mon 10 – Tue 11 Nov", days: "2", bal: "10", infotype: "IT-2001" },
+  payslip: { month: "October 2026", gross: "₹1,24,560", ded: "₹38,210", net: "₹86,350" },
+  claim:   { id: "MED-2026-04417", amount: "₹7,480", credit: "08 Nov 2026" },
+  voice:   { el: "182", cl: "10" }
+};
+
+const I18N = {
+  en: {
+    tagline:"Conversational HR over SAP", eyebrow:"Live prototype · dummy data",
+    title:"Employees never need to ", titleHl:"learn SAP", _titleEnd:".",
+    lede:"One chat or voice message does what SAP ESS makes them click through six screens for — in English, Hindi and Assamese.",
+    ctaTry:"Try the demo", ctaRace:"See the time saved",
+    s1n:"1 message", s1l:"replaces the full ESS leave-request flow",
+    s2n:"3 languages", s2l:"+ voice for shift & shop-floor staff",
+    s3n:"SAP = source of truth", s3l:"agent reads/writes via BAPIs & OData",
+    online:"online · replies instantly", typeHere:"Message HR Saathi…",
+    k1:"One agent, every doorway", h1:"Meet employees where they already are",
+    sub1:"The same assistant runs on WhatsApp, Microsoft Teams, the intranet portal and a voice line. Switch the channel and run a request — nothing else changes.",
+    intranet:"Intranet",
+    k2:"The 2-minute gap", h2:"Apply for 2 days casual leave",
+    sub2:"Same task, same SAP backend. On the left, today's ESS click-path. On the right, HR Saathi. Press play.",
+    runRace:"▶ Run the race", sapTitle:"SAP ESS portal",
+    k3:"How it fits", h3:"SAP stays the system of record",
+    sub3:"Saathi is a conversation layer, not a new HR system. It understands the request, checks who's asking, and calls the SAP transactions employees would otherwise run by hand — then writes the result straight back into SAP.",
+    n1t:"Employee", n1a:"WhatsApp / Teams", n1b:"Intranet portal", n1c:"Voice line (IVR)",
+    ar1:"plain language", n2t:"HR Saathi agent", n2a:"Understands intent (EN/HI/AS)", n2b:"RBAC — sees only your data", n2c:"Every action audited",
+    ar2:"BAPI / OData", n3t:"SAP HCM", n3a:"PA / PT / Payroll infotypes", n3b:"Leave, payslip, claims", n3c:"System of record",
+    g1:"No parallel database", g2:"Writes go through standard BAPIs", g3:"Reads scoped to the logged-in employee", g4:"Full audit trail for vigilance",
+    k4:"Built for the plant floor", h4:"Ask in your own language — or just say it",
+    sub4:"A shift operator with no laptop and no patience for a portal can ask by voice in Assamese and hear the answer back. Tap a card to run it in the chat above.",
+    discT:"Prototype for discussion.",
+    discB:" All names, numbers, payslips, claims and SAP references shown are illustrative dummy data, not real employee records. NRL is referenced as the intended deployment context; this is a concept demo, not a live system.",
+    foot:"NRL HR Saathi — conversational front door to SAP HCM · concept demo",
+    greet:"Hello Arnab 👋 I'm HR Saathi. Ask me about your leave, payslip or claims — type, tap a shortcut below, or hold the mic to speak.",
+    quick:["Apply 2 days CL from Monday","Show my last payslip","Status of my medical claim"],
+    cardLbl:{ leaveTitle:"Leave applied", type:"Type", casual:"Casual Leave (CL)", dates:"Dates", days:"Days", balAfter:"CL balance after", approver:"Approver", approverName:"Reporting Officer (B. Hazarika)", eta:"Approval ETA", etaVal:"~4 hours", ref:"Written to SAP", status:"Status",
+      payTitle:"Payslip", month:"Month", gross:"Gross earnings", ded:"Deductions", net:"Net pay", download:"Download PDF (QR-verified)",
+      claimTitle:"Medical claim", claimId:"Claim", amount:"Amount", expCredit:"Expected credit", steps:["Submitted","Verified","Approved","Paying"],
+      balTitle:"Leave balance", el:"Earned Leave", cl:"Casual Leave", days2:"days" },
+    reply:{
+      leave:"Checking your CL balance in SAP… you have 12 days. Applying for 2 days from Monday.",
+      leaveDone:"Done — your casual leave is in SAP and with your reporting officer.",
+      payslip:"Here's your latest payslip, pulled live from SAP Payroll.",
+      claim:"Your medical claim is moving. Here's where it stands in SAP right now.",
+      voiceQ:"How much leave do I have left?",
+      voiceA:"You have 182 days of Earned Leave and 10 days of Casual Leave remaining."
+    },
+    sapSteps:["Log in to SAP Fiori launchpad","Open My Services → Leave Request","Wait for the app to load","Pick leave type: Casual Leave","Select start & end dates","Review and press Send"],
+    sapFoot:"clicks", sapScreens:"screens", saathiMsg:"\"Apply 2 days CL from Monday\" → done.", oneMsg:"message", voiceHint:"Voice · Assamese"
+  },
+  hi: {
+    tagline:"SAP पर संवाद-आधारित HR", eyebrow:"लाइव प्रोटोटाइप · नमूना डेटा",
+    title:"कर्मचारियों को ", titleHl:"SAP सीखना", _titleEnd:" नहीं पड़ेगा।",
+    lede:"एक चैट या वॉइस संदेश वही काम करता है जिसके लिए SAP ESS में छह स्क्रीन क्लिक करनी पड़ती हैं — अंग्रेज़ी, हिंदी और असमिया में।",
+    ctaTry:"डेमो आज़माएँ", ctaRace:"बचा हुआ समय देखें",
+    s1n:"1 संदेश", s1l:"पूरी ESS छुट्टी प्रक्रिया की जगह",
+    s2n:"3 भाषाएँ", s2l:"+ शिफ्ट व शॉप-फ्लोर के लिए वॉइस",
+    s3n:"SAP = सत्य का स्रोत", s3l:"एजेंट BAPI/OData से पढ़ता-लिखता है",
+    online:"ऑनलाइन · तुरंत जवाब", typeHere:"HR Saathi को लिखें…",
+    k1:"एक एजेंट, हर दरवाज़ा", h1:"कर्मचारी जहाँ हैं, वहीं मिलें",
+    sub1:"वही सहायक WhatsApp, Microsoft Teams, इंट्रानेट पोर्टल और वॉइस लाइन पर चलता है। चैनल बदलिए और अनुरोध चलाइए — बाकी सब वही रहता है।",
+    intranet:"इंट्रानेट",
+    k2:"दो मिनट का अंतर", h2:"2 दिन की आकस्मिक छुट्टी लगाइए",
+    sub2:"वही काम, वही SAP बैकएंड। बाएँ आज का ESS क्लिक-पथ, दाएँ HR Saathi। चलाइए।",
+    runRace:"▶ दौड़ चलाएँ", sapTitle:"SAP ESS पोर्टल",
+    k3:"यह कैसे जुड़ता है", h3:"SAP ही रिकॉर्ड का स्रोत रहता है",
+    sub3:"Saathi एक संवाद परत है, नया HR सिस्टम नहीं। यह अनुरोध समझता है, पूछने वाले की जाँच करता है, और वही SAP लेन-देन चलाता है जो कर्मचारी खुद करते — फिर नतीजा सीधे SAP में लिख देता है।",
+    n1t:"कर्मचारी", n1a:"WhatsApp / Teams", n1b:"इंट्रानेट पोर्टल", n1c:"वॉइस लाइन (IVR)",
+    ar1:"सरल भाषा", n2t:"HR Saathi एजेंट", n2a:"मंशा समझता है (EN/HI/AS)", n2b:"RBAC — केवल आपका डेटा", n2c:"हर क्रिया दर्ज",
+    ar2:"BAPI / OData", n3t:"SAP HCM", n3a:"PA / PT / पेरोल इन्फोटाइप", n3b:"छुट्टी, पेस्लिप, दावे", n3c:"रिकॉर्ड का स्रोत",
+    g1:"कोई समानांतर डेटाबेस नहीं", g2:"लेखन मानक BAPI से", g3:"पढ़ना केवल लॉग-इन कर्मचारी तक", g4:"सतर्कता हेतु पूर्ण ऑडिट",
+    k4:"प्लांट फ्लोर के लिए", h4:"अपनी भाषा में पूछें — या बस बोलें",
+    sub4:"बिना लैपटॉप वाला शिफ्ट ऑपरेटर असमिया में बोलकर पूछ सकता है और जवाब सुन सकता है। चलाने के लिए नीचे कार्ड दबाएँ।",
+    discT:"चर्चा हेतु प्रोटोटाइप।",
+    discB:" दिखाए गए सभी नाम, आँकड़े, पेस्लिप, दावे और SAP संदर्भ केवल उदाहरण-स्वरूप नमूना डेटा हैं, असली रिकॉर्ड नहीं। NRL केवल इच्छित परिनियोजन संदर्भ के रूप में है; यह एक कॉन्सेप्ट डेमो है।",
+    foot:"NRL HR Saathi — SAP HCM का संवाद-द्वार · कॉन्सेप्ट डेमो",
+    greet:"नमस्ते अर्णब 👋 मैं HR Saathi हूँ। अपनी छुट्टी, पेस्लिप या दावों के बारे में पूछें — लिखें, नीचे शॉर्टकट दबाएँ, या माइक दबाकर बोलें।",
+    quick:["सोमवार से 2 दिन CL लगाओ","मेरी पिछली पेस्लिप दिखाओ","मेरे मेडिकल दावे की स्थिति"],
+    cardLbl:{ leaveTitle:"छुट्टी दर्ज हुई", type:"प्रकार", casual:"आकस्मिक छुट्टी (CL)", dates:"तिथियाँ", days:"दिन", balAfter:"CL शेष (बाद में)", approver:"स्वीकर्ता", approverName:"रिपोर्टिंग अधिकारी (B. Hazarika)", eta:"स्वीकृति ETA", etaVal:"~4 घंटे", ref:"SAP में दर्ज", status:"स्थिति",
+      payTitle:"पेस्लिप", month:"माह", gross:"कुल आय", ded:"कटौतियाँ", net:"शुद्ध वेतन", download:"PDF डाउनलोड (QR-सत्यापित)",
+      claimTitle:"मेडिकल दावा", claimId:"दावा", amount:"राशि", expCredit:"अपेक्षित क्रेडिट", steps:["जमा","सत्यापित","स्वीकृत","भुगतान"],
+      balTitle:"छुट्टी शेष", el:"अर्जित छुट्टी", cl:"आकस्मिक छुट्टी", days2:"दिन" },
+    reply:{
+      leave:"SAP में आपका CL शेष देख रहा हूँ… आपके पास 12 दिन हैं। सोमवार से 2 दिन लगा रहा हूँ।",
+      leaveDone:"हो गया — आपकी आकस्मिक छुट्टी SAP में है और रिपोर्टिंग अधिकारी के पास है।",
+      payslip:"यह रही आपकी नवीनतम पेस्लिप, SAP पेरोल से सीधे।",
+      claim:"आपका मेडिकल दावा आगे बढ़ रहा है। SAP में अभी यह स्थिति है।",
+      voiceQ:"मेरी कितनी छुट्टी बची है?",
+      voiceA:"आपके पास 182 दिन अर्जित छुट्टी और 10 दिन आकस्मिक छुट्टी शेष है।"
+    },
+    sapSteps:["SAP Fiori लॉन्चपैड में लॉग-इन","My Services → Leave Request खोलें","ऐप लोड होने का इंतज़ार","छुट्टी प्रकार चुनें: CL","आरंभ व अंत तिथि चुनें","समीक्षा कर Send दबाएँ"],
+    sapFoot:"क्लिक", sapScreens:"स्क्रीन", saathiMsg:"\"सोमवार से 2 दिन CL लगाओ\" → हो गया।", oneMsg:"संदेश", voiceHint:"वॉइस · असमिया"
+  },
+  as: {
+    tagline:"SAP ৰ ওপৰত কথোপকথন HR", eyebrow:"লাইভ প্ৰ'ট'টাইপ · নমুনা তথ্য",
+    title:"কৰ্মচাৰীয়ে ", titleHl:"SAP শিকিব", _titleEnd:" নালাগে।",
+    lede:"এটা চেট বা কণ্ঠ বাৰ্তাই সেই কাম কৰে যাৰ বাবে SAP ESS ত ছখন স্ক্ৰীন ক্লিক কৰিব লাগে — ইংৰাজী, হিন্দী আৰু অসমীয়াত।",
+    ctaTry:"ডেমো চাওক", ctaRace:"ৰখা সময় চাওক",
+    s1n:"১ বাৰ্তা", s1l:"সম্পূৰ্ণ ESS ছুটী প্ৰক্ৰিয়াৰ সলনি",
+    s2n:"৩ ভাষা", s2l:"+ শ্বিফ্ট আৰু শ্বপ-ফ্লোৰৰ বাবে কণ্ঠ",
+    s3n:"SAP = সত্যৰ উৎস", s3l:"এজেণ্টে BAPI/OData ৰে পঢ়ে-লিখে",
+    online:"অনলাইন · লগে লগে উত্তৰ", typeHere:"HR Saathi ক লিখক…",
+    k1:"এটা এজেণ্ট, প্ৰতিটো দুৱাৰ", h1:"কৰ্মচাৰী য'ত আছে, ত'তেই লগ পাওক",
+    sub1:"একেটা সহায়কেই WhatsApp, Microsoft Teams, ইণ্ট্ৰানেট পৰ্টেল আৰু কণ্ঠ লাইনত চলে। চেনেল সলাই অনুৰোধ চলাওক — বাকী সকলো একেই থাকে।",
+    intranet:"ইণ্ট্ৰানেট",
+    k2:"দুই মিনিটৰ ব্যৱধান", h2:"২ দিনৰ নৈমিত্তিক ছুটীৰ বাবে আবেদন",
+    sub2:"একেই কাম, একেই SAP বেকএণ্ড। বাওঁফালে আজিৰ ESS ক্লিক-পথ, সোঁফালে HR Saathi। চলাওক।",
+    runRace:"▶ দৌৰ চলাওক", sapTitle:"SAP ESS পৰ্টেল",
+    k3:"ই কেনেকৈ খাপ খায়", h3:"SAP ই ৰেকৰ্ডৰ উৎস হৈ থাকে",
+    sub3:"Saathi এটা কথোপকথন স্তৰ, নতুন HR ছিষ্টেম নহয়। ই অনুৰোধ বুজে, কোনে সুধিছে পৰীক্ষা কৰে, আৰু সেই SAP লেনদেন চলায় যিবোৰ কৰ্মচাৰীয়ে নিজে কৰিলহেঁতেন — তাৰ পিছত ফলাফল পোনে পোনে SAP ত লিখি দিয়ে।",
+    n1t:"কৰ্মচাৰী", n1a:"WhatsApp / Teams", n1b:"ইণ্ট্ৰানেট পৰ্টেল", n1c:"কণ্ঠ লাইন (IVR)",
+    ar1:"সৰল ভাষা", n2t:"HR Saathi এজেণ্ট", n2a:"অভিপ্ৰায় বুজে (EN/HI/AS)", n2b:"RBAC — কেৱল আপোনাৰ তথ্য", n2c:"প্ৰতিটো কাৰ্য নথিভুক্ত",
+    ar2:"BAPI / OData", n3t:"SAP HCM", n3a:"PA / PT / পেৰ'ল ইনফ'টাইপ", n3b:"ছুটী, পে-স্লিপ, দাবী", n3c:"ৰেকৰ্ডৰ উৎস",
+    g1:"কোনো সমান্তৰাল ডাটাবেছ নাই", g2:"লিখা মানক BAPI ৰে", g3:"পঢ়া কেৱল লগ-ইন কৰ্মচাৰীলৈ", g4:"সতৰ্কতাৰ বাবে সম্পূৰ্ণ অডিট",
+    k4:"প্লাণ্ট ফ্লোৰৰ বাবে", h4:"নিজৰ ভাষাত সোধক — বা কেৱল কওক",
+    sub4:"লেপটপ নথকা এজন শ্বিফ্ট অপাৰেটৰে অসমীয়াত কণ্ঠেৰে সুধিব পাৰে আৰু উত্তৰ শুনিব পাৰে। চলাবলৈ তলৰ কাৰ্ড টিপক।",
+    discT:"আলোচনাৰ বাবে প্ৰ'ট'টাইপ।",
+    discB:" দেখুওৱা সকলো নাম, সংখ্যা, পে-স্লিপ, দাবী আৰু SAP তথ্য কেৱল উদাহৰণস্বৰূপ নমুনা তথ্য, প্ৰকৃত ৰেকৰ্ড নহয়। NRL কেৱল অভিপ্ৰেত স্থাপনৰ প্ৰসংগ হিচাপে; এইটো এটা ধাৰণা ডেমো।",
+    foot:"NRL HR Saathi — SAP HCM লৈ কথোপকথন দুৱাৰ · ধাৰণা ডেমো",
+    greet:"নমস্কাৰ অৰ্ণব 👋 মই HR Saathi। আপোনাৰ ছুটী, পে-স্লিপ বা দাবীৰ বিষয়ে সোধক — লিখক, তলৰ শ্বৰ্টকাট টিপক, বা মাইক টিপি কওক।",
+    quick:["সোমবাৰৰ পৰা ২ দিন CL দিয়ক","মোৰ যোৱা পে-স্লিপ দেখুৱাওক","মোৰ মেডিকেল দাবীৰ স্থিতি"],
+    cardLbl:{ leaveTitle:"ছুটী নথিভুক্ত হ'ল", type:"প্ৰকাৰ", casual:"নৈমিত্তিক ছুটী (CL)", dates:"তাৰিখ", days:"দিন", balAfter:"CL বাকী (পিছত)", approver:"অনুমোদক", approverName:"ৰিপ'ৰ্টিং বিষয়া (B. Hazarika)", eta:"অনুমোদন ETA", etaVal:"~৪ ঘণ্টা", ref:"SAP ত লিখা হ'ল", status:"স্থিতি",
+      payTitle:"পে-স্লিপ", month:"মাহ", gross:"মুঠ উপাৰ্জন", ded:"কৰ্তন", net:"নিট দৰমহা", download:"PDF ডাউনল'ড (QR-সত্যাপিত)",
+      claimTitle:"মেডিকেল দাবী", claimId:"দাবী", amount:"পৰিমাণ", expCredit:"প্ৰত্যাশিত জমা", steps:["দাখিল","সত্যাপিত","অনুমোদিত","পৰিশোধ"],
+      balTitle:"ছুটী বাকী", el:"অৰ্জিত ছুটী", cl:"নৈমিত্তিক ছুটী", days2:"দিন" },
+    reply:{
+      leave:"SAP ত আপোনাৰ CL বাকী চাই আছোঁ… আপোনাৰ ১২ দিন আছে। সোমবাৰৰ পৰা ২ দিন দিছোঁ।",
+      leaveDone:"হ'ল — আপোনাৰ নৈমিত্তিক ছুটী SAP ত আছে আৰু ৰিপ'ৰ্টিং বিষয়াৰ ওচৰত।",
+      payslip:"এইয়া আপোনাৰ শেহতীয়া পে-স্লিপ, SAP পেৰ'লৰ পৰা পোনে পোনে।",
+      claim:"আপোনাৰ মেডিকেল দাবী আগবাঢ়িছে। SAP ত এতিয়া ইয়াৰ স্থিতি এই।",
+      voiceQ:"মোৰ কিমান ছুটী বাকী আছে?",
+      voiceA:"আপোনাৰ ১৮২ দিন অৰ্জিত ছুটী আৰু ১০ দিন নৈমিত্তিক ছুটী বাকী আছে।"
+    },
+    sapSteps:["SAP Fiori লঞ্চপেডত লগ-ইন","My Services → Leave Request খোলক","এপ ল'ড হোৱালৈ ৰখক","ছুটী প্ৰকাৰ বাছক: CL","আৰম্ভ আৰু শেষ তাৰিখ বাছক","পৰ্যালোচনা কৰি Send টিপক"],
+    sapFoot:"ক্লিক", sapScreens:"স্ক্ৰীন", saathiMsg:"\"সোমবাৰৰ পৰা ২ দিন CL দিয়ক\" → হ'ল।", oneMsg:"বাৰ্তা", voiceHint:"কণ্ঠ · অসমীয়া"
+  }
+};
+
+/* ============================ STATE ============================ */
+let lang = "en";
+let channel = "whatsapp";
+let busy = false;
+const $ = (s, r=document) => r.querySelector(s);
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = (ms) => new Promise(r => setTimeout(r, reduce ? Math.min(ms,120) : ms));
+
+/* ============================ i18n paint ============================ */
+function paintStatic() {
+  const t = I18N[lang];
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const k = el.getAttribute("data-t");
+    if (t[k] != null) el.textContent = t[k];
+  });
+  // title has a highlight span + trailing text
+  const title = $("h1.title");
+  title.innerHTML = t.title + '<span class="hl">' + t.titleHl + '</span>' + t._titleEnd;
+  document.documentElement.setAttribute("lang", lang === "en" ? "en" : lang);
+  document.documentElement.setAttribute("data-lang", lang);
+  $("#chanLabel").textContent = channel === "whatsapp" ? "WhatsApp" : channel === "teams" ? "Teams" : t.intranet;
+  paintQuick();
+  paintLangCards();
+  paintRaceRest();
+}
+
+function paintQuick() {
+  const t = I18N[lang];
+  const q = $("#quick");
+  q.innerHTML = "";
+  const keys = ["leave","payslip","claim"];
+  t.quick.forEach((label, i) => {
+    const b = document.createElement("button");
+    b.className = "qr"; b.textContent = label; b.dataset.scenario = keys[i];
+    b.addEventListener("click", () => runScenario(keys[i]));
+    q.appendChild(b);
+  });
+}
+
+/* ============================ chat rendering ============================ */
+function addMsg(who, text, meta) {
+  const chat = $("#chat");
+  const d = document.createElement("div");
+  d.className = "msg " + who;
+  d.innerHTML = `<div>${text}</div>` + (meta ? `<div class="meta">${meta}</div>` : "");
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+function addTyping() {
+  const chat = $("#chat");
+  const d = document.createElement("div");
+  d.className = "typing"; d.innerHTML = "<i></i><i></i><i></i>";
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+function cardHTML(kind) {
+  const L = I18N[lang].cardLbl;
+  if (kind === "leave") {
+    const s = SHARED.leave;
+    return `<div class="card"><div class="c-top"><span class="ic">🗓️</span>${L.leaveTitle}</div>
+      <div class="c-row"><span>${L.type}</span><span>${L.casual}</span></div>
+      <div class="c-row"><span>${L.dates}</span><span>${s.dates}</span></div>
+      <div class="c-row"><span>${L.days}</span><span class="num">${s.days}</span></div>
+      <div class="c-row"><span>${L.balAfter}</span><span class="num">${s.bal}</span></div>
+      <div class="c-row"><span>${L.approver}</span><span>${L.approverName}</span></div>
+      <div class="c-row"><span>${L.eta}</span><span>${L.etaVal}</span></div>
+      <div class="c-foot">🔒 ${L.ref} · ${s.infotype} · ref ${s.ref}</div></div>`;
+  }
+  if (kind === "payslip") {
+    const s = SHARED.payslip;
+    return `<div class="card"><div class="c-top"><span class="ic">💳</span>${L.payTitle} · ${s.month}</div>
+      <div class="c-row"><span>${L.gross}</span><span class="num">${s.gross}</span></div>
+      <div class="c-row"><span>${L.ded}</span><span class="num">−${s.ded}</span></div>
+      <div class="c-row" style="border-top:1px solid var(--border);padding-top:8px"><span style="color:var(--ink);font-weight:700">${L.net}</span><span class="num" style="color:var(--brand);font-weight:800">${s.net}</span></div>
+      <div class="chip-dl">⬇ ${L.download}</div></div>`;
+  }
+  if (kind === "claim") {
+    const s = SHARED.claim;
+    const st = L.steps;
+    return `<div class="card"><div class="c-top"><span class="ic">🩺</span>${L.claimTitle}</div>
+      <div class="steps">
+        <div class="step done"><div class="k">✓</div>${st[0]}</div>
+        <div class="step done"><div class="k">✓</div>${st[1]}</div>
+        <div class="step done"><div class="k">✓</div>${st[2]}</div>
+        <div class="step active"><div class="k"></div>${st[3]}</div>
+      </div>
+      <div class="c-row"><span>${L.claimId}</span><span>${s.id}</span></div>
+      <div class="c-row"><span>${L.amount}</span><span class="num">${s.amount}</span></div>
+      <div class="c-row"><span>${L.expCredit}</span><span>${s.credit} <span class="pill good">●</span></span></div></div>`;
+  }
+  if (kind === "balance") {
+    const s = SHARED.voice;
+    return `<div class="card"><div class="c-top"><span class="ic">🌴</span>${L.balTitle}</div>
+      <div class="c-row"><span>${L.el}</span><span class="num">${s.el} ${L.days2}</span></div>
+      <div class="c-row"><span>${L.cl}</span><span class="num">${s.cl} ${L.days2}</span></div></div>`;
+  }
+  return "";
+}
+
+async function runScenario(kind) {
+  if (busy) return;
+  busy = true;
+  setQuick(false);
+  const t = I18N[lang];
+  const userText = kind === "leave" ? t.quick[0] : kind === "payslip" ? t.quick[1] : t.quick[2];
+  addMsg("user", userText, "✓✓");
+  await wait(500);
+  const typ = addTyping(); await wait(950); typ.remove();
+
+  if (kind === "leave") {
+    addMsg("bot", t.reply.leave);
+    await wait(900);
+    const typ2 = addTyping(); await wait(850); typ2.remove();
+    addMsg("bot", t.reply.leaveDone + cardHTML("leave"), "SAP · BAPI_ABSENCE_CREATE");
+  } else if (kind === "payslip") {
+    addMsg("bot", t.reply.payslip + cardHTML("payslip"), "SAP · OData PT_PAYSLIP");
+  } else {
+    addMsg("bot", t.reply.claim + cardHTML("claim"), "SAP · OData claim status");
+  }
+  $("#chat").scrollTop = $("#chat").scrollHeight;
+  busy = false; setQuick(true);
+}
+
+function setQuick(on) {
+  document.querySelectorAll("#quick .qr").forEach(b => b.disabled = !on);
+}
+
+/* ============================ voice ============================ */
+function pickVoice(prefs) {
+  const vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  for (const p of prefs) { const v = vs.find(v => v.lang && v.lang.toLowerCase().startsWith(p)); if (v) return v; }
+  return null;
+}
+function speak(text, prefs) {
+  try {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice(prefs);
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = prefs[0] + "-IN"; }
+    u.rate = 0.98;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* audio may be refused in the frame */ }
+}
+async function runVoice() {
+  if (busy) return;
+  busy = true; setQuick(false);
+  const t = I18N[lang];
+  const mic = $("#micBtn"), wave = $("#wave"), fake = $("#fakeInput");
+  mic.classList.add("live"); wave.classList.add("on"); fake.style.display = "none";
+  await wait(1400);
+  mic.classList.remove("live"); wave.classList.remove("on"); fake.style.display = "";
+  // transcript appears as the user's spoken line
+  addMsg("user", "🎙 " + t.reply.voiceQ, t.voiceHint);
+  await wait(500);
+  const typ = addTyping(); await wait(950); typ.remove();
+  addMsg("bot", t.reply.voiceA + cardHTML("balance"), "🔊 SAP · PA-2006");
+  // speak the answer: try Assamese, then Bengali (same script), then Hindi
+  const prefs = lang === "as" ? ["as","bn","hi"] : lang === "hi" ? ["hi"] : ["en"];
+  speak(t.reply.voiceA, prefs);
+  busy = false; setQuick(true);
+}
+
+/* ============================ race ============================ */
+let raceRunning = false;
+function paintRaceRest() {
+  const t = I18N[lang];
+  const sap = $("#sapLane");
+  sap.innerHTML = t.sapSteps.map((s,i) => `<div class="rstep" data-i="${i}"><span class="n">${i+1}</span><span>${s}</span></div>`).join("")
+    + `<div class="rtail"><div><b class="num" id="sapClicks">14</b>${t.sapFoot}</div><div><b class="num">6</b>${t.sapScreens}</div></div>`;
+  const sa = $("#saathiLane");
+  sa.innerHTML = `<div class="saathi-bubble">${t.saathiMsg}</div>`
+    + `<div class="rtail"><div><b class="num">1</b>${t.oneMsg}</div><div><b class="num">~8s</b></div></div>`;
+  $("#sapClock").textContent = "0:00"; $("#saathiClock").textContent = "0:00";
+}
+async function runRaceAnim() {
+  if (raceRunning) return;
+  raceRunning = true;
+  const t = I18N[lang];
+  paintRaceRest();
+  const steps = [...document.querySelectorAll("#sapLane .rstep")];
+  // SAP side: step through with a running clock up to ~2:40
+  let sapSec = 0;
+  const perStep = [18, 22, 14, 26, 40, 20]; // seconds per screen
+  for (let i = 0; i < steps.length; i++) {
+    steps.forEach(s => s.classList.remove("on"));
+    steps[i].classList.add("on");
+    const target = sapSec + perStep[i];
+    const t0 = performance.now();
+    await animateClock("#sapClock", sapSec, target, reduce ? 120 : 520);
+    sapSec = target;
+    // Saathi finishes almost immediately, during the SAP first step
+    if (i === 0) { animateClock("#saathiClock", 0, 8, reduce ? 120 : 700); }
+  }
+  steps.forEach(s => s.classList.add("on"));
+  raceRunning = false;
+}
+function fmt(sec){ const m = Math.floor(sec/60); const s = Math.round(sec%60); return m + ":" + String(s).padStart(2,"0"); }
+function animateClock(sel, from, to, dur) {
+  return new Promise(res => {
+    const el = $(sel); const t0 = performance.now();
+    (function tick(now){
+      const p = Math.min(1, (now - t0)/dur);
+      el.textContent = fmt(from + (to-from)*p);
+      if (p < 1) requestAnimationFrame(tick); else { el.textContent = fmt(to); res(); }
+    })(performance.now());
+  });
+}
+
+/* ============================ language cards ============================ */
+function paintLangCards() {
+  const grid = $("#langGrid");
+  grid.innerHTML = "";
+  const order = [["en","A"],["hi","ह"],["as","অ"]];
+  order.forEach(([lg, g]) => {
+    const t = I18N[lg];
+    const d = document.createElement("div");
+    d.className = "lcard";
+    const name = lg === "en" ? "English" : lg === "hi" ? "हिन्दी" : "অসমীয়া";
+    d.innerHTML = `<div class="big">${name}</div>
+      <div class="q">“${t.reply.voiceQ}”</div>
+      <div class="a">${t.reply.voiceA}</div>`;
+    d.style.cursor = "pointer";
+    d.title = "Run in chat";
+    d.addEventListener("click", () => { setLang(lg); document.querySelector(".phone").scrollIntoView({behavior: reduce?"auto":"smooth", block:"center"}); setTimeout(runVoice, reduce?0:500); });
+    grid.appendChild(d);
+  });
+}
+
+/* ============================ wiring ============================ */
+function resetChat() {
+  $("#chat").innerHTML = "";
+  addMsg("bot", I18N[lang].greet);
+}
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll("[data-lang-btn]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.langBtn === l)));
+  paintStatic();
+  resetChat();
+}
+function setChannel(c) {
+  channel = c;
+  document.documentElement.setAttribute("data-channel", c);
+  document.querySelectorAll("[data-chan-btn]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.chanBtn === c)));
+  $("#chanLabel").textContent = c === "whatsapp" ? "WhatsApp" : c === "teams" ? "Teams" : I18N[lang].intranet;
+}
+
+document.querySelectorAll("[data-lang-btn]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.langBtn)));
+document.querySelectorAll("[data-chan-btn]").forEach(b => b.addEventListener("click", () => setChannel(b.dataset.chanBtn)));
+$("#micBtn").addEventListener("click", runVoice);
+$("#runRace").addEventListener("click", runRaceAnim);
+$("#tryBtn").addEventListener("click", () => { document.querySelector(".phone").scrollIntoView({behavior:reduce?"auto":"smooth", block:"center"}); setTimeout(() => runScenario("leave"), reduce?0:500); });
+$("#raceBtn").addEventListener("click", () => { $("#raceSection").scrollIntoView({behavior:reduce?"auto":"smooth"}); setTimeout(runRaceAnim, reduce?0:600); });
+$("#themeBtn").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : cur === "light" ? "dark" : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+  document.documentElement.setAttribute("data-theme", next);
+});
+
+// voices may load async
+if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = () => {};
+
+paintStatic();
+resetChat();
+</script>
+</body>
+</html>
